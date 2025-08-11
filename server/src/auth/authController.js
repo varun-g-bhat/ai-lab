@@ -64,7 +64,7 @@ const loginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function
         });
         const oneMonthInMilliseconds = 7 * 24 * 60 * 60 * 1000;
         res.cookie("token", token, {
-            secure: true,
+            secure: false,
             maxAge: oneMonthInMilliseconds,
         });
         res.json({
