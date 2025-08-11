@@ -42,7 +42,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/discussion", discussionRouter);
+// app.use("/api/v1/discussion", discussionRouter);
 app.use("/api/v1/ai-tutor", aiTutorRouter);
 app.use("/api/v1/resource", resourceRouter);
 app.use("/api/v1/compiler", compileRouter);

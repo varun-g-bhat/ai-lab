@@ -1,4 +1,4 @@
-import { io, server } from "./src/app";
+import { server } from "./src/app";
 import connectDB from "./src/config/db";
 
 const startServer = async () => {
@@ -11,7 +11,7 @@ const startServer = async () => {
   });
 };
 
-io.on("connection", (socket) => {
+server.on("connection", (socket) => {
   console.log("New client connected");
   socket.on("disconnect", () => {
     console.log("Client disconnected");
