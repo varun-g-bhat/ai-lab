@@ -19,11 +19,11 @@ config();
 const app = express();
 
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL,
-  },
-});
+// const io = new Server(server, {
+//   cors: {
+//     origin: process.env.FRONTEND_URL,
+//   },
+// });
 
 app.use(
   cors({
@@ -52,4 +52,4 @@ app.use("/api/v1/merge-all", mergeAllRouter);
 
 app.use(globalErrorHandler);
 
-export { server, io };
+export { server };
