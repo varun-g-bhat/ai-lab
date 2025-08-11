@@ -66,9 +66,9 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 
     const oneMonthInMilliseconds = 7 * 24 * 60 * 60 * 1000;
     res.cookie("token", token, {
-      httpOnly: false,
-      secure: false,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      httpOnly: true, // more secure
+      secure: process.env.NODE_ENV === "production", // true in Render
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // none for cross-origin
       path: "/",
     });
     res.json({
