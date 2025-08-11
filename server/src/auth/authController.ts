@@ -66,8 +66,8 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 
     const oneMonthInMilliseconds = 7 * 24 * 60 * 60 * 1000;
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
+      httpOnly: false,
+      secure: false,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
       path: "/",
     });
@@ -83,7 +83,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 
 const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    res.cookie("token", "", { httpOnly: true, expires: new Date(0) });
+    res.cookie("token", "", { httpOnly: false, expires: new Date(0) });
     res.status(200).json({ message: "Logout successful." });
   } catch (error) {
     return next(createHttpError(500, "Error while LogOut the user"));
