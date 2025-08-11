@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.BACKEND_URL,
+  baseURL: "https://ai-lab-1-x6f6.onrender.com",
   headers: {
     "Content-Type": "application/json",
   },

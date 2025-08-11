@@ -28,7 +28,14 @@ exports.server = server;
 // });
 app.use((0, cors_1.default)({
     credentials: true,
-    origin: process.env.FRONTEND_URL,
+    origin: [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:5174",
+        process.env.FRONTEND_URL || ""
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
 }));
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());

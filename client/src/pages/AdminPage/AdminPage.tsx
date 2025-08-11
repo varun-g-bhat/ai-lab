@@ -48,7 +48,7 @@
 //   const fetchUsers = async () => {
 //     try {
 //       const response = await axios.get(
-//         `${process.env.BACKEND_URL}/api/v1/auth/all-users`
+//         `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/auth/all-users`
 //       );
 //       const data = response.data;
 //       setUsers(data);
@@ -268,7 +268,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Users, Search } from "lucide-react";
-import axios from "axios";
+import apiClient from "@/lib/axios";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { UserDetails } from "@/types/auth";
@@ -294,8 +294,8 @@ const ManageUsers: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.BACKEND_URL}/api/v1/auth/all-users`
+        const response = await apiClient.get(
+          "/api/v1/auth/all-users"
         );
         setUsers(response.data);
         setFilteredUsers(response.data);
@@ -331,8 +331,8 @@ const ManageUsers: React.FC = () => {
     userRole: "student" | "teacher" | "admin"
   ) => {
     try {
-      const response = await axios.post(
-        `${process.env.BACKEND_URL}/api/v1/auth/change-role`,
+      const response = await apiClient.post(
+        "/api/v1/auth/change-role",
         {
           userId,
           newRole: userRole,

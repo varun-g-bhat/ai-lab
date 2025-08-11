@@ -56,7 +56,7 @@ export default function CodeEditor() {
       try {
         setLoadingProblem(true);
         const response = await axios.get(
-          `${process.env.BACKEND_URL}/api/v1/questions/${id}`,
+          `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/questions/${id}`,
           { withCredentials: true }
         );
         setSelectedProblem(response.data);
@@ -88,7 +88,7 @@ export default function CodeEditor() {
 
     try {
       const response = await axios.post(
-        `${process.env.BACKEND_URL}/api/v1/compiler/compile`,
+        `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/compiler/compile`,
         body,
         { withCredentials: true }
       );
@@ -103,7 +103,7 @@ export default function CodeEditor() {
 
         if (response.data.stdout == selectedProblem?.exOutput) {
           axios.post(
-            `${process.env.BACKEND_URL}/api/v1/questions/solve`,
+            `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/questions/solve`,
             {
               questionId: id,
             },
@@ -134,7 +134,7 @@ export default function CodeEditor() {
 
     try {
       const response = await axios.post(
-        `${process.env.BACKEND_URL}/api/v1/compiler/hints`,
+        `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/compiler/hints`,
         {
           code,
           question: selectedProblem?.description,

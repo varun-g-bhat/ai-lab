@@ -4,7 +4,6 @@ import Layout from "./Layout/Layout";
 import Home from "./pages/Home/Home";
 import Login from "./pages/Auth/Login";
 import Signup from "./pages/Auth/Signup";
-import Community from "./pages/Community/Community";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useMutation } from "@tanstack/react-query";
@@ -54,7 +53,6 @@ function App() {
           <Route path="admin" element={<ManageUsers />} />
           <Route path="login" element={<Login />} />
           <Route path="signup" element={<Signup />} />
-          <Route path="community" element={<Community />} />
           <Route path="chat-pdf" element={<PdfChatting />} />
           <Route path="resources" element={<Resources />} />
           <Route path="quiz" element={<Quiz />} />

@@ -95,7 +95,7 @@ const TeacherDashboard: React.FC = () => {
 
   const fetchTeacherDashboard = async () => {
     const response = await axios.get(
-      `${process.env.BACKEND_URL}/api/v1/merge-all/teacher-dashboard?labId=${labId}`
+      `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/merge-all/teacher-dashboard?labId=${labId}`
     );
 
     if (response.status !== 200) {

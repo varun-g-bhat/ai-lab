@@ -1,6 +1,6 @@
 import { Lab, Question } from "@/types/lab";
 
-const API_BASE_URL = `${process.env.BACKEND_URL}/api/v1`;
+const API_BASE_URL = `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1`;
 
 export const api = {
   async getEnrolledLabs(): Promise<Lab[]> {

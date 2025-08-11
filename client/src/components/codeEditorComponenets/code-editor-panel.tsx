@@ -208,7 +208,7 @@
 //     input: "9",
 //   };
 //   const response = await axios.post(
-//     `${process.env.BACKEND_URL}/api/v1/compiler/compile`,
+//     `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/compiler/compile`,
 //     body
 //   );
 
@@ -470,7 +470,7 @@
 
 //   try {
 //     const response = await axios.post(
-//       `${process.env.BACKEND_URL}/api/v1/compiler/compile`,
+//       `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/compiler/compile`,
 //       payload
 //     );
 
@@ -693,15 +693,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Maximize2,
-  RotateCcw,
-  Menu,
-  Bookmark,
-  Clock,
-  Play,
-  Plus,
-} from "lucide-react";
+import { RotateCcw, Plus } from "lucide-react";
 import axios from "axios";
 import { Input } from "../ui/input";
 
@@ -730,7 +722,7 @@ export function CodeEditorPanel() {
       input: "9",
     };
     const response = await axios.post(
-      `${process.env.BACKEND_URL}/api/v1/compiler/compile`,
+      `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/compiler/compile`,
       body
     );
 
