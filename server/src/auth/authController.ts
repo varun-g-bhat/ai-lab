@@ -84,7 +84,13 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 
 const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    res.cookie("token", "", { httpOnly: false, expires: new Date(0) });
+    res.cookie("token", "", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      expires: new Date(0),
+    });
     res.status(200).json({ message: "Logout successful." });
   } catch (error) {
     return next(createHttpError(500, "Error while LogOut the user"));

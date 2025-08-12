@@ -157,7 +157,7 @@ export default function CodeEditor() {
       <div className="flex">
         {/* Main Content */}
         <main className="flex-1 min-h-screen">
-          <div className="grid grid-cols-1 xl:grid-cols-2 h-screen">
+          <div className="grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 xl:grid-cols-2 h-screen">
             {/* Problem Description */}
             <div className="bg-white border-r border-gray-200 overflow-y-auto">
               <div className="p-6">
