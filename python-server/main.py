@@ -14,7 +14,7 @@ app = FastAPI()
 
 origins = [
     "https://ai-lab-1-x6f6.onrender.com",
-    "http://localhost:5173",
+    "https://ai-lab-nine.vercel.app",
 ]
 
 app.add_middleware(
