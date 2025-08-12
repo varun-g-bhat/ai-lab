@@ -83,7 +83,12 @@ const loginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function
 exports.loginUser = loginUser;
 const logoutUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        res.cookie("token", "", { httpOnly: false, expires: new Date(0) });
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            path: "/",
+        });
         res.status(200).json({ message: "Logout successful." });
     }
     catch (error) {
