@@ -60,7 +60,7 @@ app.include_router(pdfchat.router, prefix="/api/v1/pdfchat",tags=["pdfchat"])
 
 @app.get("/")
 def root():
-    return {"message":"Welcome to Interactive Learning Python Backend","status":"Ok"}
+    return {"message":"Welcome to AI LAB Python Backend","status":"Ok"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

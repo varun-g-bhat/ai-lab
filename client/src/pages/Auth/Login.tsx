@@ -14,7 +14,6 @@ import { useDispatch } from "react-redux";
 import { loginUser } from "@/store/userAuth";
 
 const Login: React.FC = () => {
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -27,20 +26,20 @@ const Login: React.FC = () => {
   const loginmutation = useMutation({
     mutationFn: login,
     onSuccess: (res) => {
-      dispatch(loginUser(res.data))
+      dispatch(loginUser(res.data));
       toast.success("Signup Successful", toastOptions);
-      navigate('/')
+      navigate("/");
     },
     onError: (error: AxiosError) => {
       const errResponse = error.response?.data as ErrorResponse;
-      console.log(errResponse)
+      console.log(errResponse);
       toast.error(errResponse.message, toastOptions);
     },
   });
 
-  const handleLogin = async() =>{
+  const handleLogin = async () => {
     loginmutation.mutate(credentials);
-  }
+  };
 
   return (
     <>
@@ -104,7 +103,7 @@ const Login: React.FC = () => {
         <div className="hidden bg-muted lg:block">
           <img
             src="https://cdn.elearningindustry.com/wp-content/uploads/2021/07/Create-Interactive-eLearning-Content-In-3-Steps.png"
-            alt="Image showing a pictorial representation of the interactive learing"
+            alt="Image showing a pictorial representation of the AI LAB"
             width="1920"
             height="1080"
             className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"

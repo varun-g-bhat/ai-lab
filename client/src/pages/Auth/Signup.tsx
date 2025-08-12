@@ -131,7 +131,7 @@ const Signup: React.FC = () => {
         <div className="hidden bg-muted lg:block">
           <img
             src="https://cdn.elearningindustry.com/wp-content/uploads/2021/07/Create-Interactive-eLearning-Content-In-3-Steps.png"
-            alt="Image showing a pictorial representation of the interactive learing"
+            alt="Image showing a pictorial representation of the AI LAB"
             width="1920"
             height="1080"
             className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
