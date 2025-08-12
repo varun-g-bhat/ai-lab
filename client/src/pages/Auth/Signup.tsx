@@ -12,13 +12,12 @@ import { AxiosError } from "axios";
 import { ErrorResponse } from "@/types/auth";
 
 const Signup: React.FC = () => {
-
   const navigate = useNavigate();
 
   const [credentials, setcredentials] = useState({
     email: "",
     password: "",
-    userDetails: { name: "" },
+    userDetails: { name: "", role: "student" },
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +25,11 @@ const Signup: React.FC = () => {
     if (name === "name") {
       setcredentials({
         ...credentials,
-        userDetails: { ...credentials.userDetails, name: value },
+        userDetails: {
+          ...credentials.userDetails,
+          name: value,
+          role: credentials.userDetails.role || "student",
+        },
       });
     } else {
       setcredentials({ ...credentials, [name]: value });
@@ -38,7 +41,7 @@ const Signup: React.FC = () => {
     onSuccess: (res) => {
       console.log(res.data);
       toast.success("Signup Successful", toastOptions);
-      toast.info("Please login with your credentials",toastOptions)
+      toast.info("Please login with your credentials", toastOptions);
       navigate("/login");
     },
     onError: (error: AxiosError) => {
