@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,7 +6,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   GraduationCap,
   Users,
@@ -19,10 +17,7 @@ import {
   Zap,
   Shield,
   TrendingUp,
-  ArrowRight,
   Star,
-  Play,
-  Monitor,
   UserCheck,
   Settings,
 } from "lucide-react";

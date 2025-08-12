@@ -30,7 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { FaDownload} from "react-icons/fa";
+import { FaDownload } from "react-icons/fa";
 import { FaFilePdf } from "react-icons/fa6";
 
 import {
@@ -88,12 +88,16 @@ const Resources: React.FC = () => {
       | React.ChangeEvent<HTMLInputElement>
       | React.ChangeEvent<HTMLTextAreaElement>
   ) => {
-    const { name, value, files } = e.target;
-    if (files) {
+    const { name, value } = e.target;
+    if (
+      e.target instanceof HTMLInputElement &&
+      e.target.type === "file" &&
+      e.target.files
+    ) {
       if (name === "resourcefile") {
-        setResourceFile(files[0]);
+        setResourceFile(e.target.files[0]);
       } else if (name === "thumbnail") {
-        setThumbnailFile(files[0]);
+        setThumbnailFile(e.target.files[0]);
       }
     } else {
       setResourceInfo({ ...resourceInfo, [name]: value });
@@ -123,27 +127,27 @@ const Resources: React.FC = () => {
 
   const handleSubmit = () => {
     const formData = new FormData();
-    
+
     if (resourceInfo?.title) {
       formData.append("title", resourceInfo.title);
     }
-  
+
     if (resourceInfo?.description) {
       formData.append("description", resourceInfo.description);
     }
-  
+
     if (resourceFile) {
       formData.append("file", resourceFile);
     }
-  
+
     if (thumbnailFile) {
       formData.append("coverImage", thumbnailFile);
     }
-  
+
     tags.forEach((tag, index) => {
       formData.append(`tags[${index}]`, tag);
     });
-  
+
     addResourcemutation.mutate(formData);
   };
 
@@ -255,8 +259,11 @@ const Resources: React.FC = () => {
                           Tags
                         </legend>
                         <div className="flex gap-2">
-                          <Input value={newTag}
-                                onChange={(e) => setNewTag(e.target.value)} placeholder="New tag" />
+                          <Input
+                            value={newTag}
+                            onChange={(e) => setNewTag(e.target.value)}
+                            placeholder="New tag"
+                          />
                           <Button variant="outline" onClick={handleAddTag}>
                             Add tag <Plus className="h-4 w-4" />
                           </Button>
@@ -331,7 +338,11 @@ const Resources: React.FC = () => {
                                 alt="Product image"
                                 className="aspect-square rounded-md object-cover"
                                 height="64"
-                                src={resource.coverImage}
+                                src={
+                                  resource.coverImage instanceof File
+                                    ? URL.createObjectURL(resource.coverImage)
+                                    : resource.coverImage
+                                }
                                 width="64"
                               />
                             </TableCell>
@@ -353,7 +364,13 @@ const Resources: React.FC = () => {
                                         <img
                                           alt="Product image"
                                           className="aspect-square rounded-md object-cover w-fit"
-                                          src={resource.coverImage}
+                                          src={
+                                            resource.coverImage instanceof File
+                                              ? URL.createObjectURL(
+                                                  resource.coverImage
+                                                )
+                                              : resource.coverImage
+                                          }
                                         />
                                       </div>
                                       <div>

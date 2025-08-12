@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Code, Users } from "lucide-react";
+import { BookOpen, Users } from "lucide-react";
 import { Lab } from "@/types/lab";
 import { useNavigate } from "react-router-dom";
 

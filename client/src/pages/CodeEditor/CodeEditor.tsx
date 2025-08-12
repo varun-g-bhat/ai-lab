@@ -22,8 +22,6 @@ import { Editor } from "@monaco-editor/react";
 import axios from "axios";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
 
 interface Problem {
   title: string;

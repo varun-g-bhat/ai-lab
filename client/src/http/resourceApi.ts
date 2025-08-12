@@ -1,4 +1,3 @@
-import { Resource } from "@/types/resource";
 import axios from "axios";
 
 const api = axios.create({
@@ -13,6 +12,6 @@ export const getResources = async () => {
   return api.get("/api/v1/resource");
 };
 
-export const addResources = async (data) => {
+export const addResources = async (data: FormData) => {
   return api.post("/api/v1/resource", data);
 };

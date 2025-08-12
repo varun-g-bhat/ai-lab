@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -338,7 +337,7 @@ const TeacherDashboard: React.FC = () => {
                       `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`
                     }
                   >
-                    {pieChartData.map((entry, index) => (
+                    {pieChartData.map((_, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}
