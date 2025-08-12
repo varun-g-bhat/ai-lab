@@ -132,11 +132,10 @@ export default function CodeEditor() {
 
     try {
       const response = await axios.post(
-        `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/compiler/hints`,
-        {
-          code,
-          question: selectedProblem?.description,
-        },
+        `https://ai-lab-ihei.onrender.com/api/v1/aitutor/generate/hints?code=${encodeURIComponent(
+          code
+        )}&question=${encodeURIComponent(selectedProblem?.description ?? "")}`,
+
         { withCredentials: true }
       );
 
