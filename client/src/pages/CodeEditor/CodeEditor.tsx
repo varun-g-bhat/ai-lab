@@ -423,7 +423,7 @@ export default function CodeEditor() {
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-6">
+                          {/* <div className="space-y-6">
                             {loadingQuiz ? (
                               <div className="text-gray-500">
                                 Fetching quiz questions...
@@ -468,6 +468,25 @@ export default function CodeEditor() {
                               //   );
                               // }
 
+                              quiz.questions.map((q: any) => (
+                                <QuestionCard key={q.questionNo} q={q} />
+                              ))
+                            ) : (
+                              <div className="text-muted-foreground">
+                                No quiz questions available.
+                              </div>
+                            )}
+                          </div> */}
+                          <div className="space-y-6">
+                            {loadingQuiz ? (
+                              <div className="text-gray-500">
+                                Fetching quiz questions...
+                              </div>
+                            ) : quiz?.message ? (
+                              <div className="text-red-500 font-semibold text-center">
+                                {quiz.message}
+                              </div>
+                            ) : quiz?.questions?.length > 0 ? (
                               quiz.questions.map((q: any) => (
                                 <QuestionCard key={q.questionNo} q={q} />
                               ))
