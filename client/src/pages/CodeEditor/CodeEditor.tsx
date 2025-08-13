@@ -36,6 +36,36 @@ interface HintResponse {
   hints: string[];
 }
 
+function QuestionCard({ q }: { q: any }) {
+  const [showAnswer, setShowAnswer] = useState(false);
+
+  return (
+    <div className="border rounded-lg p-4 bg-gray-50" key={q.questionNo}>
+      <div className="font-semibold mb-2">
+        Q{q.questionNo}. {q.question}
+      </div>
+      <ul className="list-decimal pl-5 mb-2">
+        {q.options.map((opt: string, i: number) => (
+          <li key={i} className="text-sm mb-1">
+            {opt}
+          </li>
+        ))}
+      </ul>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setShowAnswer(!showAnswer)}
+        className="mb-2"
+      >
+        {showAnswer ? "Hide Answer" : "Show Answer"}
+      </Button>
+      {showAnswer && (
+        <div className="text-green-700 font-medium">Answer: {q.answer}</div>
+      )}
+    </div>
+  );
+}
+
 export default function CodeEditor() {
   const [selectedProblem, setSelectedProblem] = useState<Problem | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -399,44 +429,48 @@ export default function CodeEditor() {
                                 Fetching quiz questions...
                               </div>
                             ) : quiz?.questions?.length > 0 ? (
-                              quiz.questions.map((q: any, _: number) => {
-                                const [showAnswer, setShowAnswer] =
-                                  useState(false);
-                                return (
-                                  <div
-                                    key={q.questionNo}
-                                    className="border rounded-lg p-4 bg-gray-50"
-                                  >
-                                    <div className="font-semibold mb-2">
-                                      Q{q.questionNo}. {q.question}
-                                    </div>
-                                    <ul className="list-decimal pl-5 mb-2">
-                                      {q.options.map(
-                                        (opt: string, i: number) => (
-                                          <li key={i} className="text-sm mb-1">
-                                            {opt}
-                                          </li>
-                                        )
-                                      )}
-                                    </ul>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => setShowAnswer(!showAnswer)}
-                                      className="mb-2"
-                                    >
-                                      {showAnswer
-                                        ? "Hide Answer"
-                                        : "Show Answer"}
-                                    </Button>
-                                    {showAnswer && (
-                                      <div className="text-green-700 font-medium">
-                                        Answer: {q.answer}
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })
+                              // quiz.questions.map((q: any, _: number) => {
+                              //   const [showAnswer, setShowAnswer] =
+                              //     useState(false);
+                              //   return (
+                              //     <div
+                              //       key={q.questionNo}
+                              //       className="border rounded-lg p-4 bg-gray-50"
+                              //     >
+                              //       <div className="font-semibold mb-2">
+                              //         Q{q.questionNo}. {q.question}
+                              //       </div>
+                              //       <ul className="list-decimal pl-5 mb-2">
+                              //         {q.options.map(
+                              //           (opt: string, i: number) => (
+                              //             <li key={i} className="text-sm mb-1">
+                              //               {opt}
+                              //             </li>
+                              //           )
+                              //         )}
+                              //       </ul>
+                              //       <Button
+                              //         variant="ghost"
+                              //         size="sm"
+                              //         onClick={() => setShowAnswer(!showAnswer)}
+                              //         className="mb-2"
+                              //       >
+                              //         {showAnswer
+                              //           ? "Hide Answer"
+                              //           : "Show Answer"}
+                              //       </Button>
+                              //       {showAnswer && (
+                              //         <div className="text-green-700 font-medium">
+                              //           Answer: {q.answer}
+                              //         </div>
+                              //       )}
+                              //     </div>
+                              //   );
+                              // }
+
+                              quiz.questions.map((q: any) => (
+                                <QuestionCard key={q.questionNo} q={q} />
+                              ))
                             ) : (
                               <div className="text-muted-foreground">
                                 No quiz questions available.
