@@ -17,7 +17,7 @@ const generate_Roadmap = async (
     const _req = req as AuthRequest;
     const { topic } = req.params;
     const response = await axios.post(
-      `${process.env.PYTHON_BACKEND_URL}/aitutor/roadmap`,
+      `${process.env.PYTHON_BACKEND_URL}/api/v1/aitutor/roadmap`,
       {},
       {
         params: {
@@ -77,7 +77,7 @@ const generate_content = async (
 
     if (!content) {
       const response = await axios.post(
-        `${process.env.PYTHON_BACKEND_URL}/aitutor/roadmap/generatecontent`,
+        `${process.env.PYTHON_BACKEND_URL}/api/v1/aitutor/roadmap/generatecontent`,
         req.body
       );
       const createContent = await contentModel.create({

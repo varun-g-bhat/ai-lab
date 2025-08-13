@@ -119,7 +119,7 @@ const generate_hints = async (
     const _req = req as AuthRequest;
     const { question, code } = req.body;
     const hints = await axios.post(
-      `${process.env.PYTHON_BACKEND_URL}/aitutor/generate/hints`,
+      `${process.env.PYTHON_BACKEND_URL}/api/v1/aitutor/generate/hints`,
       {},
       {
         params: {
@@ -172,7 +172,7 @@ const generateQuiz = async (
 
       if (problem) {
         const response = await axios.post(
-          `${process.env.PYTHON_BACKEND_URL}/aitutor/generatequiz`,
+          `${process.env.PYTHON_BACKEND_URL}/api/v1/aitutor/generatequiz`,
           { question: problem.description }
         );
 

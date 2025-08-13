@@ -58,6 +58,15 @@ async def generate_hints_router(question: str, code: str, token: str = Cookie(No
 @router.post("/generatequiz")
 async def generate_roadmap_quiz(request: Request,token: str = Cookie(None)):
     problem = await request.json()
-    print(problem)
-    quiz = await generate_quiz(problem)
+    print("Received problem data:", problem)
+    
+    # Extract the question from the request body
+    question = problem.get("question", "")
+    if not question:
+        return JSONResponse(
+            status_code=400, 
+            content={"error": "Question is required"}
+        )
+    
+    quiz = await generate_quiz(question)
     return quiz
