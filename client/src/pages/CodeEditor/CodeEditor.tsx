@@ -53,6 +53,8 @@ export default function CodeEditor() {
     isCorrect: boolean | null;
     message: string;
   }>({ isCorrect: null, message: "" });
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
 
   const { id } = useParams();
 
@@ -145,6 +147,9 @@ export default function CodeEditor() {
             message: "Incorrect solution. Keep trying!",
           });
         }
+
+        // Refresh submissions list
+        fetchSubmissions();
       } catch (submissionError) {
         console.error("Error submitting solution:", submissionError);
         setSubmissionStatus({
@@ -195,13 +200,19 @@ export default function CodeEditor() {
   const fetchQuiz = async () => {
     try {
       setLoadingQuiz(true);
-      const response = await axios.get(
+
+      // First try to fetch existing quiz
+      const existingQuizResponse = await axios.get(
         `https://ai-lab-1-x6f6.onrender.com/api/v1/compiler/quiz`,
         { withCredentials: true }
       );
 
-      if (!response.data) {
-        const response = await axios.post(
+      if (existingQuizResponse.data && existingQuizResponse.data.length > 0) {
+        console.log("Existing quiz found:", existingQuizResponse.data);
+        setQuiz(existingQuizResponse.data[0]); // Take the first quiz
+      } else {
+        // Generate new quiz if none exists
+        const generateResponse = await axios.post(
           `https://ai-lab-1-x6f6.onrender.com/api/v1/compiler/quiz`,
           {
             questionId: selectedProblem?._id,
@@ -209,25 +220,42 @@ export default function CodeEditor() {
           { withCredentials: true }
         );
 
-        if (response.data) {
-          setQuiz(response.data);
-        }
-        return;
-      } else {
-        console.log("Quiz response:", response.data);
-
-        setQuiz(response.data);
+        console.log("Generated quiz:", generateResponse.data);
+        setQuiz(generateResponse.data);
       }
     } catch (error) {
-      console.error("Error fetching quiz:", error);
+      console.error("Error fetching/generating quiz:", error);
+    } finally {
+      setLoadingQuiz(false);
     }
-
-    setLoadingQuiz(false); // Set loading state to false
   };
 
   const handleFetchQuiz = () => {
     fetchQuiz();
   };
+
+  const fetchSubmissions = async () => {
+    try {
+      setLoadingSubmissions(true);
+      const response = await axios.get(
+        `https://ai-lab-1-x6f6.onrender.com/api/v1/questions/submissions/${id}`,
+        { withCredentials: true }
+      );
+      console.log("Submissions response:", response.data);
+      setSubmissions(response.data.submissions || []);
+    } catch (error) {
+      console.error("Error fetching submissions:", error);
+      setSubmissions([]);
+    } finally {
+      setLoadingSubmissions(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchSubmissions();
+    }
+  }, [id]);
 
   console.log("Submission status:", submissionStatus);
 
@@ -236,13 +264,13 @@ export default function CodeEditor() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex">
+      <div className="flex flex-col lg:flex-row">
         {/* Main Content */}
         <main className="flex-1 min-h-screen">
-          <div className="grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 xl:grid-cols-2 h-screen">
+          <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
             {/* Problem Description */}
-            <div className="bg-white border-r border-gray-200 overflow-y-auto">
-              <div className="p-6">
+            <div className="bg-white border-r border-gray-200 overflow-y-auto order-2 lg:order-1">
+              <div className="p-4 md:p-6">
                 <div className="space-y-6">
                   {/* Problem Header */}
                   <div className="space-y-4">
@@ -257,10 +285,11 @@ export default function CodeEditor() {
 
                   {/* Problem Content */}
                   <Tabs defaultValue="description" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
                       <TabsTrigger value="description">Description</TabsTrigger>
                       <TabsTrigger value="hint">Hint</TabsTrigger>
-                      <TabsTrigger value="quiz">Viva Questions</TabsTrigger>
+                      <TabsTrigger value="quiz">Quiz</TabsTrigger>
+                      <TabsTrigger value="submissions">Submissions</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="description" className="space-y-6">
@@ -324,47 +353,6 @@ export default function CodeEditor() {
                       </Card>
                     </TabsContent>
 
-                    {/* <TabsContent value="quiz" className="space-y-4">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center space-x-2">
-                            <Award className="h-5 w-5 text-yellow-500" />
-                            <span>Viva Questions</span>
-                          </CardTitle>
-                          <CardDescription className="flex flex-col space-y-2">
-                            Based on the questions few Viva questions are below
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="mt-2"
-                              onClick={handleFetchQuiz}
-                              disabled={loadingQuiz}
-                            >
-                              {loadingQuiz ? "Loading..." : "Get Quiz"}
-                            </Button>
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            {loadingQuiz ? (
-                              <div className="text-gray-500">
-                                Fetching quiz questions...
-                              </div>
-                            ) : (
-                              <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                                {quiz?.map(
-                                  (question: string, index: number) => (
-                                    <li key={index} className="text-sm">
-                                      {question}
-                                    </li>
-                                  )
-                                )}
-                              </ul>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </TabsContent> */}
                     <TabsContent value="quiz" className="space-y-4">
                       <Card>
                         <CardHeader>
@@ -458,22 +446,130 @@ export default function CodeEditor() {
                         </CardContent>
                       </Card>
                     </TabsContent>
+
+                    <TabsContent value="submissions" className="space-y-4">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center space-x-2">
+                            <Award className="h-5 w-5 text-blue-500" />
+                            <span>Previous Submissions</span>
+                          </CardTitle>
+                          <CardDescription>
+                            View all your previous attempts for this question
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            {loadingSubmissions ? (
+                              <div className="text-gray-500">
+                                Loading submissions...
+                              </div>
+                            ) : submissions && submissions.length > 0 ? (
+                              submissions
+                                .slice()
+                                .reverse()
+                                .map((submission: any, index: number) => (
+                                  <div
+                                    key={index}
+                                    className="border rounded-lg p-4 bg-gray-50"
+                                  >
+                                    <div className="flex items-center justify-between mb-3">
+                                      <div className="flex items-center space-x-2">
+                                        <Badge
+                                          variant={
+                                            submission.isCorrect
+                                              ? "default"
+                                              : "destructive"
+                                          }
+                                          className={
+                                            submission.isCorrect
+                                              ? "bg-green-100 text-green-800 border-green-300"
+                                              : "bg-red-100 text-red-800 border-red-300"
+                                          }
+                                        >
+                                          {submission.isCorrect
+                                            ? "✓ Correct"
+                                            : "✗ Incorrect"}
+                                        </Badge>
+                                        <Badge variant="outline">
+                                          {submission.language.toUpperCase()}
+                                        </Badge>
+                                      </div>
+                                      <span className="text-xs text-gray-500">
+                                        {new Date(
+                                          submission.submittedAt
+                                        ).toLocaleString()}
+                                      </span>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <div>
+                                        <Label className="text-sm font-medium">
+                                          Code:
+                                        </Label>
+                                        <pre className="bg-gray-100 p-2 rounded text-xs overflow-x-auto">
+                                          <code>{submission.code}</code>
+                                        </pre>
+                                      </div>
+
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                          <Label className="text-sm font-medium">
+                                            Output:
+                                          </Label>
+                                          <pre className="bg-gray-100 p-2 rounded text-xs">
+                                            <code>{submission.output}</code>
+                                          </pre>
+                                        </div>
+                                        <div>
+                                          <Label className="text-sm font-medium">
+                                            Expected:
+                                          </Label>
+                                          <pre className="bg-gray-100 p-2 rounded text-xs">
+                                            <code>
+                                              {submission.expectedOutput}
+                                            </code>
+                                          </pre>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))
+                            ) : (
+                              <div className="text-center py-8">
+                                <div className="text-gray-400 mb-2">
+                                  <Award className="h-12 w-12 mx-auto mb-4" />
+                                </div>
+                                <h3 className="text-lg font-medium mb-2">
+                                  No submissions yet
+                                </h3>
+                                <p className="text-muted-foreground">
+                                  You haven't submitted any code for this
+                                  question yet. Write some code and click "Run"
+                                  to get started!
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
                   </Tabs>
                 </div>
               </div>
             </div>
 
             {/* Code Editor */}
-            <div className="bg-gray-900 text-white overflow-hidden flex flex-col">
+            <div className="bg-gray-900 text-white overflow-hidden flex flex-col order-1 lg:order-2 h-96 lg:h-full">
               {/* Editor Header */}
-              <div className="bg-gray-800 border-b border-gray-700 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
+              <div className="bg-gray-800 border-b border-gray-700 p-2 md:p-4">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center space-x-2 md:space-x-4">
                     <Select
                       value={language}
                       onValueChange={handleLanguageChange}
                     >
-                      <SelectTrigger className="w-28 bg-[#1a1a1a] border-[#3d3d3d] text-white">
+                      <SelectTrigger className="w-20 md:w-28 bg-[#1a1a1a] border-[#3d3d3d] text-white">
                         <SelectValue placeholder="Language" />
                       </SelectTrigger>
                       <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
@@ -505,30 +601,31 @@ export default function CodeEditor() {
                     </Select>
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1 md:space-x-2">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-gray-300 hover:text-white"
+                      className="text-gray-300 hover:text-white text-xs md:text-sm"
                       onClick={handleResetCode}
                     >
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Reset
+                      <RotateCcw className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                      <span className="hidden md:inline">Reset</span>
                     </Button>
                     <Button
                       size="sm"
-                      className="bg-green-600 hover:bg-green-700"
+                      className="bg-green-600 hover:bg-green-700 text-xs md:text-sm"
                       onClick={handleSubmitCode}
+                      disabled={loadingResult}
                     >
-                      <Play className="h-4 w-4 mr-2" />
-                      Run
+                      <Play className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                      {loadingResult ? "Running..." : "Run"}
                     </Button>
                   </div>
                 </div>
               </div>
 
               {/* Code Editor Area */}
-              <div className="flex-1 p-4">
+              <div className="flex-1 p-2 md:p-4">
                 <div className="h-full">
                   <Editor
                     height="100%"
@@ -538,10 +635,11 @@ export default function CodeEditor() {
                     theme="vs-dark"
                     onChange={(value) => setCode(value || "")}
                     options={{
-                      fontSize: 14,
-                      minimap: { enabled: false },
+                      fontSize: window.innerWidth < 768 ? 12 : 14,
+                      minimap: { enabled: window.innerWidth >= 1024 },
                       scrollBeyondLastLine: false,
                       automaticLayout: true,
+                      wordWrap: "on",
                     }}
                   />
                 </div>
@@ -554,41 +652,46 @@ export default function CodeEditor() {
                   onValueChange={setActiveTab}
                   className="w-full"
                 >
-                  <div className="px-4 pt-2">
-                    <TabsList className="bg-gray-700">
+                  <div className="px-2 md:px-4 pt-2">
+                    <TabsList className="bg-gray-700 w-full md:w-auto">
                       <TabsTrigger
                         value="testcase"
-                        className="text-gray-300 data-[state=active]:text-black"
+                        className="text-gray-300 data-[state=active]:text-black text-xs md:text-sm"
                       >
-                        Testcase
+                        Test
                       </TabsTrigger>
                       <TabsTrigger
                         value="result"
-                        className="text-gray-300 data-[state=active]:text-black"
+                        className="text-gray-300 data-[state=active]:text-black text-xs md:text-sm"
                       >
-                        Test Result
+                        Result
                       </TabsTrigger>
                     </TabsList>
                   </div>
 
                   {/* Testcase Tab Content */}
-                  <TabsContent value="testcase" className="p-4 space-y-4">
-                    <ScrollArea className="h-64">
+                  <TabsContent
+                    value="testcase"
+                    className="p-2 md:p-4 space-y-4"
+                  >
+                    <ScrollArea className="h-32 md:h-64">
                       <div className="space-y-4">
                         <div>
-                          <Label className="text-gray-300">Input</Label>
-                          <div className="mt-2 bg-gray-700 p-3 rounded">
-                            <code className="text-white">
+                          <Label className="text-gray-300 text-xs md:text-sm">
+                            Input
+                          </Label>
+                          <div className="mt-2 bg-gray-700 p-2 md:p-3 rounded">
+                            <code className="text-white text-xs md:text-sm">
                               {selectedProblem?.exInput || "input"}
                             </code>
                           </div>
                         </div>
                         <div>
-                          <Label className="text-gray-300">
+                          <Label className="text-gray-300 text-xs md:text-sm">
                             Expected Output
                           </Label>
-                          <div className="mt-2 bg-gray-700 p-3 rounded">
-                            <code className="text-white">
+                          <div className="mt-2 bg-gray-700 p-2 md:p-3 rounded">
+                            <code className="text-white text-xs md:text-sm">
                               {selectedProblem?.exOutput || "output"}
                             </code>
                           </div>
@@ -598,25 +701,39 @@ export default function CodeEditor() {
                   </TabsContent>
 
                   {/* Test Result Tab Content */}
-                  <TabsContent value="result" className="p-4">
-                    <ScrollArea className="h-64">
+                  <TabsContent value="result" className="p-2 md:p-4">
+                    <ScrollArea className="h-32 md:h-64">
                       <div className="space-y-4">
-                        <div className="bg-gray-700 p-3 rounded">
+                        {submissionStatus.message && (
+                          <div
+                            className={`p-2 md:p-3 rounded ${
+                              submissionStatus.isCorrect
+                                ? "bg-green-800 text-green-100"
+                                : "bg-red-800 text-red-100"
+                            }`}
+                          >
+                            <div className="text-xs md:text-sm">
+                              {submissionStatus.message}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="bg-gray-700 p-2 md:p-3 rounded">
                           <div className="text-xs text-gray-400 mb-1">
                             Output:
                           </div>
-                          <code className="text-green-400">
+                          <code className="text-green-400 text-xs md:text-sm break-all">
                             {loadingResult
                               ? "Running..."
                               : output || "Run the code to see output"}
                           </code>
                         </div>
 
-                        <div className="bg-gray-700 p-3 rounded">
+                        <div className="bg-gray-700 p-2 md:p-3 rounded">
                           <div className="text-xs text-gray-400 mb-1">
                             Expected:
                           </div>
-                          <code className="text-green-400">
+                          <code className="text-green-400 text-xs md:text-sm break-all">
                             {selectedProblem?.exOutput || "output"}
                           </code>
                         </div>
