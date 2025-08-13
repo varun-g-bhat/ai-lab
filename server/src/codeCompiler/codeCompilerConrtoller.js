@@ -13,9 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generate_hints = exports.compileCode = void 0;
+exports.fetchQuiz = exports.generateQuiz = exports.generate_hints = exports.compileCode = void 0;
 const axios_1 = __importDefault(require("axios"));
 const http_errors_1 = __importDefault(require("http-errors"));
+const quizModel_1 = __importDefault(require("./quizModel"));
+const solvedModel_1 = __importDefault(require("../questions/solvedModel"));
+const questionsModel_1 = __importDefault(require("../questions/questionsModel"));
 const languageMap = {
     c: { language: "c", version: "10.2.0" },
     cpp: { language: "c++", version: "10.2.0" },
@@ -71,3 +74,53 @@ const generate_hints = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.generate_hints = generate_hints;
+const generateQuiz = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const _req = req;
+        const { questionId } = req.body;
+        console.log("User ID:", _req.userId);
+        console.log("Question ID from request:", questionId);
+        // Check if user has solved this question using the new schema
+        const solvedRecord = yield solvedModel_1.default.findOne({
+            questionId: questionId,
+            userId: _req.userId,
+            isSolved: true, // Only allow quiz generation if question is actually solved
+        });
+        console.log("Solved Record:", solvedRecord);
+        if (solvedRecord) {
+            // Query the problem
+            const problem = yield questionsModel_1.default.findById(questionId);
+            console.log("Found problem:", problem);
+            if (problem) {
+                const response = yield axios_1.default.post(`${process.env.PYTHON_BACKEND_URL}/aitutor/generatequiz`, { question: problem.description });
+                console.log("Python backend response:", response.data);
+                yield quizModel_1.default.create(Object.assign(Object.assign({}, response.data), { userId: _req.userId, questionId: questionId }));
+                res.status(200).json(response.data);
+            }
+            else {
+                res.status(404).json({ message: "Question not found" });
+            }
+        }
+        else {
+            res.status(200).json({
+                message: "Please solve the question correctly to get the quiz questions",
+            });
+        }
+    }
+    catch (error) {
+        console.error("Error in generateQuiz:", error);
+        return next((0, http_errors_1.default)(500, "Error generating the content"));
+    }
+});
+exports.generateQuiz = generateQuiz;
+const fetchQuiz = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const _req = req;
+        const quiz = yield quizModel_1.default.find({ userId: _req.userId });
+        res.status(200).json(quiz);
+    }
+    catch (error) {
+        return next((0, http_errors_1.default)(500, "Error fetching the roadmap"));
+    }
+});
+exports.fetchQuiz = fetchQuiz;

@@ -22,6 +22,7 @@ import { Editor } from "@monaco-editor/react";
 import axios from "axios";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useParams } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 interface Problem {
   title: string;
@@ -46,6 +47,12 @@ export default function CodeEditor() {
   const [loadingHint, setLoadingHint] = useState(false); // Loading state for hint
   const [loadingResult, setLoadingResult] = useState(false); // Loading state for result
   const [loadingProblem, setLoadingProblem] = useState(true); // Loading state for problem
+  const [loadingQuiz, setLoadingQuiz] = useState(false); // Loading state for quiz
+  const [quiz, setQuiz] = useState<any>(null);
+  const [submissionStatus, setSubmissionStatus] = useState<{
+    isCorrect: boolean | null;
+    message: string;
+  }>({ isCorrect: null, message: "" });
 
   const { id } = useParams();
 
@@ -86,28 +93,64 @@ export default function CodeEditor() {
 
     try {
       const response = await axios.post(
-        `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/compiler/compile`,
+        `https://ai-lab-1-x6f6.onrender.com/api/v1/compiler/compile`,
         body,
         { withCredentials: true }
       );
 
       // Check for errors in the response and set output accordingly
+      let actualOutput = "";
+      let hasError = false;
+
       if (response.data.stderr) {
         console.error(response.data.stderr);
         setOutput(response.data.stderr); // Set error output
+        actualOutput = response.data.stderr;
+        hasError = true;
       } else {
         console.log(response.data.stdout);
         setOutput(response.data.stdout); // Set success output
+        actualOutput = response.data.stdout;
+      }
 
-        if (response.data.stdout == selectedProblem?.exOutput) {
-          axios.post(
-            `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/questions/solve`,
-            {
-              questionId: id,
-            },
-            { withCredentials: true }
-          );
+      // Determine if the solution is correct
+      const isCorrect = !hasError && actualOutput == selectedProblem?.exOutput;
+      console.log(isCorrect);
+
+      // Send submission data to backend
+      try {
+        await axios.post(
+          `https://ai-lab-1-x6f6.onrender.com/api/v1/questions/solve`,
+          {
+            questionId: id,
+            code: code,
+            language: language,
+            output: actualOutput,
+            expectedOutput: selectedProblem?.exOutput || "",
+            isCorrect: isCorrect,
+          },
+          { withCredentials: true }
+        );
+
+        if (isCorrect) {
+          console.log("✅ Correct solution! Question marked as solved.");
+          setSubmissionStatus({
+            isCorrect: true,
+            message: "Correct solution! Question solved successfully.",
+          });
+        } else {
+          console.log("❌ Incorrect solution. Try again!");
+          setSubmissionStatus({
+            isCorrect: false,
+            message: "Incorrect solution. Keep trying!",
+          });
         }
+      } catch (submissionError) {
+        console.error("Error submitting solution:", submissionError);
+        setSubmissionStatus({
+          isCorrect: false,
+          message: "Error submitting solution. Please try again.",
+        });
       }
 
       console.log("Code executed successfully:", response.data);
@@ -149,6 +192,45 @@ export default function CodeEditor() {
     setLoadingHint(false); // Set loading state to false
   };
 
+  const fetchQuiz = async () => {
+    try {
+      setLoadingQuiz(true);
+      const response = await axios.get(
+        `https://ai-lab-1-x6f6.onrender.com/api/v1/compiler/quiz`,
+        { withCredentials: true }
+      );
+
+      if (!response.data) {
+        const response = await axios.post(
+          `https://ai-lab-1-x6f6.onrender.com/api/v1/compiler/quiz`,
+          {
+            questionId: selectedProblem?._id,
+          },
+          { withCredentials: true }
+        );
+
+        if (response.data) {
+          setQuiz(response.data);
+        }
+        return;
+      } else {
+        console.log("Quiz response:", response.data);
+
+        setQuiz(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching quiz:", error);
+    }
+
+    setLoadingQuiz(false); // Set loading state to false
+  };
+
+  const handleFetchQuiz = () => {
+    fetchQuiz();
+  };
+
+  console.log("Submission status:", submissionStatus);
+
   if (loadingProblem) return <div>Loading problem...</div>;
   if (!selectedProblem) return <div>Problem not found</div>;
 
@@ -175,9 +257,10 @@ export default function CodeEditor() {
 
                   {/* Problem Content */}
                   <Tabs defaultValue="description" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
+                    <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="description">Description</TabsTrigger>
                       <TabsTrigger value="hint">Hint</TabsTrigger>
+                      <TabsTrigger value="quiz">Viva Questions</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="description" className="space-y-6">
@@ -235,6 +318,141 @@ export default function CodeEditor() {
                                   )
                                 )}
                               </ul>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+
+                    {/* <TabsContent value="quiz" className="space-y-4">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center space-x-2">
+                            <Award className="h-5 w-5 text-yellow-500" />
+                            <span>Viva Questions</span>
+                          </CardTitle>
+                          <CardDescription className="flex flex-col space-y-2">
+                            Based on the questions few Viva questions are below
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mt-2"
+                              onClick={handleFetchQuiz}
+                              disabled={loadingQuiz}
+                            >
+                              {loadingQuiz ? "Loading..." : "Get Quiz"}
+                            </Button>
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            {loadingQuiz ? (
+                              <div className="text-gray-500">
+                                Fetching quiz questions...
+                              </div>
+                            ) : (
+                              <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                                {quiz?.map(
+                                  (question: string, index: number) => (
+                                    <li key={index} className="text-sm">
+                                      {question}
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent> */}
+                    <TabsContent value="quiz" className="space-y-4">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center space-x-2">
+                            <Award className="h-5 w-5 text-yellow-500" />
+                            <span>Viva Questions</span>
+                          </CardTitle>
+                          <CardDescription>
+                            {quiz?.testName && (
+                              <div className="font-semibold text-lg">
+                                {quiz.testName}
+                              </div>
+                            )}
+                            {quiz?.testDescription && (
+                              <div className="text-muted-foreground mb-2">
+                                {quiz.testDescription}
+                              </div>
+                            )}
+                            {quiz?.difficulty && (
+                              <Badge variant="secondary" className="mr-2">
+                                Difficulty: {quiz.difficulty}
+                              </Badge>
+                            )}
+                            {quiz?.totalQuestions && (
+                              <Badge variant="outline">
+                                Total Questions: {quiz.totalQuestions}
+                              </Badge>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mt-4"
+                              onClick={handleFetchQuiz}
+                              disabled={loadingQuiz}
+                            >
+                              {loadingQuiz ? "Loading..." : "Get Quiz"}
+                            </Button>
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-6">
+                            {loadingQuiz ? (
+                              <div className="text-gray-500">
+                                Fetching quiz questions...
+                              </div>
+                            ) : quiz?.questions?.length > 0 ? (
+                              quiz.questions.map((q: any, _: number) => {
+                                const [showAnswer, setShowAnswer] =
+                                  useState(false);
+                                return (
+                                  <div
+                                    key={q.questionNo}
+                                    className="border rounded-lg p-4 bg-gray-50"
+                                  >
+                                    <div className="font-semibold mb-2">
+                                      Q{q.questionNo}. {q.question}
+                                    </div>
+                                    <ul className="list-decimal pl-5 mb-2">
+                                      {q.options.map(
+                                        (opt: string, i: number) => (
+                                          <li key={i} className="text-sm mb-1">
+                                            {opt}
+                                          </li>
+                                        )
+                                      )}
+                                    </ul>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => setShowAnswer(!showAnswer)}
+                                      className="mb-2"
+                                    >
+                                      {showAnswer
+                                        ? "Hide Answer"
+                                        : "Show Answer"}
+                                    </Button>
+                                    {showAnswer && (
+                                      <div className="text-green-700 font-medium">
+                                        Answer: {q.answer}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              <div className="text-muted-foreground">
+                                No quiz questions available.
+                              </div>
                             )}
                           </div>
                         </CardContent>

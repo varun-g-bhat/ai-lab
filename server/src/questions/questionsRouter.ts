@@ -6,6 +6,7 @@ import {
   getQuestionByLabId,
   questionSolved,
   getQuestionById,
+  getSubmissionHistory,
 } from "./questionsController";
 import authenticate from "../middleware/authUser";
 
@@ -16,6 +17,11 @@ questionsRouter.put("/update/:id", authenticate, updateQuestion);
 questionsRouter.delete("/delete/:id", authenticate, deleteQuestion);
 questionsRouter.get("/lab/:labId", authenticate, getQuestionByLabId);
 questionsRouter.post("/solve", authenticate, questionSolved);
+questionsRouter.get(
+  "/submissions/:questionId",
+  authenticate,
+  getSubmissionHistory
+);
 questionsRouter.get("/:id", authenticate, getQuestionById);
 
 export default questionsRouter;

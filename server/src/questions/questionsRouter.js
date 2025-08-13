@@ -12,5 +12,6 @@ questionsRouter.put("/update/:id", authUser_1.default, questionsController_1.upd
 questionsRouter.delete("/delete/:id", authUser_1.default, questionsController_1.deleteQuestion);
 questionsRouter.get("/lab/:labId", authUser_1.default, questionsController_1.getQuestionByLabId);
 questionsRouter.post("/solve", authUser_1.default, questionsController_1.questionSolved);
+questionsRouter.get("/submissions/:questionId", authUser_1.default, questionsController_1.getSubmissionHistory);
 questionsRouter.get("/:id", authUser_1.default, questionsController_1.getQuestionById);
 exports.default = questionsRouter;

@@ -53,6 +53,10 @@ import { Request, Response, NextFunction } from "express";
 import axios, { AxiosRequestConfig } from "axios";
 import { AuthRequest } from "../types/auth";
 import createHttpError from "http-errors";
+import quizModel from "./quizModel";
+import solvedModel from "../questions/solvedModel";
+import questionsModel from "../questions/questionsModel";
+import mongoose from "mongoose";
 
 interface CompileCodeRequest {
   code: string;
@@ -132,4 +136,71 @@ const generate_hints = async (
   }
 };
 
-export { compileCode, generate_hints };
+const generateQuiz = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const _req = req as AuthRequest;
+    const { questionId } = req.body;
+
+    console.log("User ID:", _req.userId);
+    console.log("Question ID from request:", questionId);
+
+    // Check if user has solved this question using the new schema
+    const solvedRecord = await solvedModel.findOne({
+      questionId: questionId,
+      userId: _req.userId,
+      isSolved: true, // Only allow quiz generation if question is actually solved
+    });
+
+    console.log("Solved Record:", solvedRecord);
+
+    if (solvedRecord) {
+      // Query the problem
+      const problem = await questionsModel.findById(questionId);
+
+      console.log("Found problem:", problem);
+
+      if (problem) {
+        const response = await axios.post(
+          `${process.env.PYTHON_BACKEND_URL}/aitutor/generatequiz`,
+          { question: problem.description }
+        );
+
+        console.log("Python backend response:", response.data);
+
+        await quizModel.create({
+          ...response.data,
+          userId: _req.userId,
+          questionId: questionId,
+        });
+
+        res.status(200).json(response.data);
+      } else {
+        res.status(404).json({ message: "Question not found" });
+      }
+    } else {
+      res.status(200).json({
+        message:
+          "Please solve the question correctly to get the quiz questions",
+      });
+    }
+  } catch (error) {
+    console.error("Error in generateQuiz:", error);
+    return next(createHttpError(500, "Error generating the content"));
+  }
+};
+
+const fetchQuiz = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const _req = req as AuthRequest;
+    const quiz = await quizModel.find({ userId: _req.userId });
+    res.status(200).json(quiz);
+  } catch (error) {
+    return next(createHttpError(500, "Error fetching the roadmap"));
+  }
+};
+
+export { compileCode, generate_hints, generateQuiz, fetchQuiz };

@@ -97,41 +97,70 @@ const questionSolved = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { questionId } = req.body;
+  const { questionId, code, language, output, expectedOutput, isCorrect } =
+    req.body;
 
   const _req = req as AuthRequest;
   try {
     const question = await questionsModel.findById(questionId);
 
-    const labId = question?.labId;
-    const existingSolved = await solvedModel.findOne({
+    if (!question) {
+      return next(createHttpError(404, "Question not found"));
+    }
+
+    const labId = question.labId;
+
+    // Create submission object
+    const newSubmission = {
+      code,
+      language,
+      output,
+      expectedOutput,
+      isCorrect,
+      submittedAt: new Date(),
+    };
+
+    // Find existing solved question record
+    let existingSolved = await solvedModel.findOne({
       questionId,
       userId: _req.userId,
       labId,
     });
 
     if (existingSolved) {
-      await solvedModel.updateOne(
-        { _id: existingSolved._id },
-        { solvedAt: new Date() }
-      );
+      // Add new submission to existing record
+      existingSolved.submissions.push(newSubmission);
+      existingSolved.totalSubmissions += 1;
+      existingSolved.lastSubmittedAt = new Date();
 
-      return res.status(201).json(existingSolved);
+      // If this is the first correct submission, mark as solved
+      if (isCorrect && !existingSolved.isSolved) {
+        existingSolved.isSolved = true;
+        existingSolved.firstSolvedAt = new Date();
+      }
+
+      console.log(existingSolved);
+      await existingSolved.save();
+      return res.status(200).json(existingSolved);
+    } else {
+      // Create new solved question record
+      const solvedQuestion = await solvedModel.create({
+        questionId,
+        userId: _req.userId,
+        labId,
+        submissions: [newSubmission],
+        totalSubmissions: 1,
+        lastSubmittedAt: new Date(),
+        isSolved: isCorrect,
+        firstSolvedAt: isCorrect ? new Date() : undefined,
+      });
+
+      console.log(solvedQuestion);
+
+      return res.status(201).json(solvedQuestion);
     }
-
-    if (!questionId || !_req.userId) {
-      return next(createHttpError(400, "Question ID and User ID are required"));
-    }
-
-    const solvedQuestion = await solvedModel.create({
-      questionId,
-      userId: _req.userId,
-      labId,
-      solvedAt: new Date(),
-    });
-
-    res.status(201).json(solvedQuestion);
   } catch (error) {
+    console.error("Error in questionSolved:", error);
     next(error);
   }
 };
@@ -162,6 +191,40 @@ const getQuestionById = async (
   }
 };
 
+const getSubmissionHistory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { questionId } = req.params;
+  const _req = req as AuthRequest;
+
+  try {
+    const submissionHistory = await solvedModel
+      .findOne({
+        questionId,
+        userId: _req.userId,
+      })
+      .select(
+        "submissions totalSubmissions isSolved firstSolvedAt lastSubmittedAt"
+      );
+
+    if (!submissionHistory) {
+      return res.status(200).json({
+        submissions: [],
+        totalSubmissions: 0,
+        isSolved: false,
+        message: "No submissions found for this question",
+      });
+    }
+
+    res.status(200).json(submissionHistory);
+  } catch (error) {
+    console.error("Error fetching submission history:", error);
+    next(error);
+  }
+};
+
 export {
   createQuestion,
   updateQuestion,
@@ -169,4 +232,5 @@ export {
   getQuestionById,
   getQuestionByLabId,
   questionSolved,
+  getSubmissionHistory,
 };

@@ -4,6 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
+const submissionSchema = new mongoose_1.default.Schema({
+    code: { type: String, required: true },
+    language: { type: String, required: true },
+    output: { type: String, required: true },
+    expectedOutput: { type: String, required: true },
+    isCorrect: { type: Boolean, required: true },
+    submittedAt: { type: Date, default: Date.now },
+});
 const solvedQuestionSchema = new mongoose_1.default.Schema({
     questionId: {
         type: mongoose_1.default.Schema.Types.ObjectId,
@@ -20,7 +28,11 @@ const solvedQuestionSchema = new mongoose_1.default.Schema({
         ref: "Lab",
         required: true,
     },
-    solvedAt: { type: Date, default: Date.now },
+    submissions: [submissionSchema],
+    firstSolvedAt: { type: Date },
+    lastSubmittedAt: { type: Date, default: Date.now },
+    totalSubmissions: { type: Number, default: 0 },
+    isSolved: { type: Boolean, default: false },
 }, {
     timestamps: true,
 });

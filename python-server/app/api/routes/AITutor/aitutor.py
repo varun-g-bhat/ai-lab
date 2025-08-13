@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Cookie, Request
-from .helper import generate_roadmap,generate_content, generate_hints
+from .helper import generate_roadmap,generate_content, generate_hints, generate_quiz
 from fastapi.responses import JSONResponse
 
 
@@ -53,3 +53,11 @@ async def generate_hints_router(question: str, code: str, token: str = Cookie(No
             status_code=500, 
             content={"message": "An internal error occurred. Failed to generate hints."}
         )
+
+
+@router.post("/generatequiz")
+async def generate_roadmap_quiz(request: Request,token: str = Cookie(None)):
+    problem = await request.json()
+    print(problem)
+    quiz = await generate_quiz(problem)
+    return quiz

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.questionSolved = exports.getQuestionByLabId = exports.getQuestionById = exports.deleteQuestion = exports.updateQuestion = exports.createQuestion = void 0;
+exports.getSubmissionHistory = exports.questionSolved = exports.getQuestionByLabId = exports.getQuestionById = exports.deleteQuestion = exports.updateQuestion = exports.createQuestion = void 0;
 const questionsModel_1 = __importDefault(require("./questionsModel"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const solvedModel_1 = __importDefault(require("./solvedModel"));
@@ -80,32 +80,61 @@ const getQuestionByLabId = (req, res, next) => __awaiter(void 0, void 0, void 0,
 });
 exports.getQuestionByLabId = getQuestionByLabId;
 const questionSolved = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { questionId } = req.body;
+    const { questionId, code, language, output, expectedOutput, isCorrect } = req.body;
     const _req = req;
     try {
         const question = yield questionsModel_1.default.findById(questionId);
-        const labId = question === null || question === void 0 ? void 0 : question.labId;
-        const existingSolved = yield solvedModel_1.default.findOne({
+        if (!question) {
+            return next((0, http_errors_1.default)(404, "Question not found"));
+        }
+        const labId = question.labId;
+        // Create submission object
+        const newSubmission = {
+            code,
+            language,
+            output,
+            expectedOutput,
+            isCorrect,
+            submittedAt: new Date(),
+        };
+        // Find existing solved question record
+        let existingSolved = yield solvedModel_1.default.findOne({
             questionId,
             userId: _req.userId,
             labId,
         });
         if (existingSolved) {
-            yield solvedModel_1.default.updateOne({ _id: existingSolved._id }, { solvedAt: new Date() });
-            return res.status(201).json(existingSolved);
+            // Add new submission to existing record
+            existingSolved.submissions.push(newSubmission);
+            existingSolved.totalSubmissions += 1;
+            existingSolved.lastSubmittedAt = new Date();
+            // If this is the first correct submission, mark as solved
+            if (isCorrect && !existingSolved.isSolved) {
+                existingSolved.isSolved = true;
+                existingSolved.firstSolvedAt = new Date();
+            }
+            console.log(existingSolved);
+            yield existingSolved.save();
+            return res.status(200).json(existingSolved);
         }
-        if (!questionId || !_req.userId) {
-            return next((0, http_errors_1.default)(400, "Question ID and User ID are required"));
+        else {
+            // Create new solved question record
+            const solvedQuestion = yield solvedModel_1.default.create({
+                questionId,
+                userId: _req.userId,
+                labId,
+                submissions: [newSubmission],
+                totalSubmissions: 1,
+                lastSubmittedAt: new Date(),
+                isSolved: isCorrect,
+                firstSolvedAt: isCorrect ? new Date() : undefined,
+            });
+            console.log(solvedQuestion);
+            return res.status(201).json(solvedQuestion);
         }
-        const solvedQuestion = yield solvedModel_1.default.create({
-            questionId,
-            userId: _req.userId,
-            labId,
-            solvedAt: new Date(),
-        });
-        res.status(201).json(solvedQuestion);
     }
     catch (error) {
+        console.error("Error in questionSolved:", error);
         next(error);
     }
 });
@@ -130,3 +159,29 @@ const getQuestionById = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.getQuestionById = getQuestionById;
+const getSubmissionHistory = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { questionId } = req.params;
+    const _req = req;
+    try {
+        const submissionHistory = yield solvedModel_1.default
+            .findOne({
+            questionId,
+            userId: _req.userId,
+        })
+            .select("submissions totalSubmissions isSolved firstSolvedAt lastSubmittedAt");
+        if (!submissionHistory) {
+            return res.status(200).json({
+                submissions: [],
+                totalSubmissions: 0,
+                isSolved: false,
+                message: "No submissions found for this question",
+            });
+        }
+        res.status(200).json(submissionHistory);
+    }
+    catch (error) {
+        console.error("Error fetching submission history:", error);
+        next(error);
+    }
+});
+exports.getSubmissionHistory = getSubmissionHistory;
