@@ -23,7 +23,7 @@ const generate_Roadmap = (req, res, next) => __awaiter(void 0, void 0, void 0, f
     try {
         const _req = req;
         const { topic } = req.params;
-        const response = yield axios_1.default.post(`${process.env.PYTHON_BACKEND_URL}/aitutor/roadmap`, {}, {
+        const response = yield axios_1.default.post(`${process.env.PYTHON_BACKEND_URL}/api/v1/aitutor/roadmap`, {}, {
             params: {
                 topic,
             },
@@ -66,7 +66,7 @@ const generate_content = (req, res, next) => __awaiter(void 0, void 0, void 0, f
         const _req = req;
         const content = yield contentModel_1.default.findOne({ lessonId: _id });
         if (!content) {
-            const response = yield axios_1.default.post(`${process.env.PYTHON_BACKEND_URL}/aitutor/roadmap/generatecontent`, req.body);
+            const response = yield axios_1.default.post(`${process.env.PYTHON_BACKEND_URL}/api/v1/aitutor/roadmap/generatecontent`, req.body);
             const createContent = yield contentModel_1.default.create({
                 roadMapId: roadMapId,
                 lessonId: _id,

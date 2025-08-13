@@ -61,7 +61,7 @@ const generate_hints = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
     try {
         const _req = req;
         const { question, code } = req.body;
-        const hints = yield axios_1.default.post(`${process.env.PYTHON_BACKEND_URL}/aitutor/generate/hints`, {}, {
+        const hints = yield axios_1.default.post(`${process.env.PYTHON_BACKEND_URL}/api/v1/aitutor/generate/hints`, {}, {
             params: {
                 question,
                 code,
@@ -99,7 +99,7 @@ const generateQuiz = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             const problem = yield questionsModel_1.default.findById(questionId);
             console.log("Found problem:", !!problem);
             if (problem) {
-                const response = yield axios_1.default.post(`${process.env.PYTHON_BACKEND_URL}/aitutor/generatequiz`, { question: problem.description });
+                const response = yield axios_1.default.post(`${process.env.PYTHON_BACKEND_URL}/api/v1/aitutor/generatequiz`, { question: problem.description });
                 console.log("Python backend response:", response.data);
                 const savedQuiz = yield quizModel_1.default.create(Object.assign(Object.assign({}, response.data), { userId: _req.userId, questionId: questionId }));
                 console.log("Saved quiz:", savedQuiz);
