@@ -147,21 +147,28 @@ const generateQuiz = async (
 
     console.log("User ID:", _req.userId);
     console.log("Question ID from request:", questionId);
+    console.log("Question ID type:", typeof questionId);
+
+    // Validate questionId
+    if (!questionId || !mongoose.Types.ObjectId.isValid(questionId)) {
+      return res.status(400).json({ message: "Invalid question ID" });
+    }
 
     // Check if user has solved this question using the new schema
     const solvedRecord = await solvedModel.findOne({
-      questionId: questionId,
-      userId: _req.userId,
+      questionId: new mongoose.Types.ObjectId(questionId),
+      userId: new mongoose.Types.ObjectId(_req.userId),
       isSolved: true, // Only allow quiz generation if question is actually solved
     });
 
-    console.log("Solved Record:", solvedRecord);
+    console.log("Solved Record found:", !!solvedRecord);
+    console.log("Solved Record details:", solvedRecord);
 
     if (solvedRecord) {
       // Query the problem
       const problem = await questionsModel.findById(questionId);
 
-      console.log("Found problem:", problem);
+      console.log("Found problem:", !!problem);
 
       if (problem) {
         const response = await axios.post(
@@ -171,20 +178,36 @@ const generateQuiz = async (
 
         console.log("Python backend response:", response.data);
 
-        await quizModel.create({
+        const savedQuiz = await quizModel.create({
           ...response.data,
           userId: _req.userId,
           questionId: questionId,
         });
+
+        console.log("Saved quiz:", savedQuiz);
 
         res.status(200).json(response.data);
       } else {
         res.status(404).json({ message: "Question not found" });
       }
     } else {
+      // Let's also check what records exist for debugging
+      const allRecords = await solvedModel.find({
+        questionId: new mongoose.Types.ObjectId(questionId),
+        userId: new mongoose.Types.ObjectId(_req.userId),
+      });
+
+      console.log("All solved records for this question and user:", allRecords);
+
       res.status(200).json({
         message:
           "Please solve the question correctly to get the quiz questions",
+        debug: {
+          questionId,
+          userId: _req.userId,
+          foundRecords: allRecords.length,
+          solvedRecords: allRecords.filter((r) => r.isSolved).length,
+        },
       });
     }
   } catch (error) {
@@ -196,10 +219,26 @@ const generateQuiz = async (
 const fetchQuiz = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const _req = req as AuthRequest;
-    const quiz = await quizModel.find({ userId: _req.userId });
+    // Get questionId from query params since it's a GET request
+    const { questionId } = req.query;
+
+    console.log(
+      "Fetching quiz for user:",
+      _req.userId,
+      "question:",
+      questionId
+    );
+
+    const quiz = await quizModel.find({
+      userId: _req.userId,
+      ...(questionId && { questionId: questionId }),
+    });
+
+    console.log("Found quiz:", quiz);
     res.status(200).json(quiz);
   } catch (error) {
-    return next(createHttpError(500, "Error fetching the roadmap"));
+    console.error("Error fetching quiz:", error);
+    return next(createHttpError(500, "Error fetching the quiz"));
   }
 };
 

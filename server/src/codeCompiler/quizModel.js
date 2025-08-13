@@ -21,5 +21,10 @@ const QuizSchema = new mongoose_1.default.Schema({
         ref: "users",
         required: true,
     },
+    questionId: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: "questions",
+        required: true,
+    },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model("Quiz", QuizSchema);

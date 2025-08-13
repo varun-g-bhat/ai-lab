@@ -233,7 +233,7 @@ export default function CodeEditor() {
 
       // First try to fetch existing quiz
       const existingQuizResponse = await axios.get(
-        `https://ai-lab-1-x6f6.onrender.com/api/v1/compiler/quiz`,
+        `https://ai-lab-1-x6f6.onrender.com/api/v1/compiler/quiz?questionId=${id}`,
         { withCredentials: true }
       );
 
@@ -245,7 +245,7 @@ export default function CodeEditor() {
         const generateResponse = await axios.post(
           `https://ai-lab-1-x6f6.onrender.com/api/v1/compiler/quiz`,
           {
-            questionId: selectedProblem?._id,
+            questionId: id, // Use the id from URL params, not selectedProblem._id
           },
           { withCredentials: true }
         );

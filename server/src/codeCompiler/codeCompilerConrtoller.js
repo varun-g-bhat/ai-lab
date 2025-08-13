@@ -19,6 +19,7 @@ const http_errors_1 = __importDefault(require("http-errors"));
 const quizModel_1 = __importDefault(require("./quizModel"));
 const solvedModel_1 = __importDefault(require("../questions/solvedModel"));
 const questionsModel_1 = __importDefault(require("../questions/questionsModel"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const languageMap = {
     c: { language: "c", version: "10.2.0" },
     cpp: { language: "c++", version: "10.2.0" },
@@ -80,21 +81,28 @@ const generateQuiz = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         const { questionId } = req.body;
         console.log("User ID:", _req.userId);
         console.log("Question ID from request:", questionId);
+        console.log("Question ID type:", typeof questionId);
+        // Validate questionId
+        if (!questionId || !mongoose_1.default.Types.ObjectId.isValid(questionId)) {
+            return res.status(400).json({ message: "Invalid question ID" });
+        }
         // Check if user has solved this question using the new schema
         const solvedRecord = yield solvedModel_1.default.findOne({
-            questionId: questionId,
-            userId: _req.userId,
+            questionId: new mongoose_1.default.Types.ObjectId(questionId),
+            userId: new mongoose_1.default.Types.ObjectId(_req.userId),
             isSolved: true, // Only allow quiz generation if question is actually solved
         });
-        console.log("Solved Record:", solvedRecord);
+        console.log("Solved Record found:", !!solvedRecord);
+        console.log("Solved Record details:", solvedRecord);
         if (solvedRecord) {
             // Query the problem
             const problem = yield questionsModel_1.default.findById(questionId);
-            console.log("Found problem:", problem);
+            console.log("Found problem:", !!problem);
             if (problem) {
                 const response = yield axios_1.default.post(`${process.env.PYTHON_BACKEND_URL}/aitutor/generatequiz`, { question: problem.description });
                 console.log("Python backend response:", response.data);
-                yield quizModel_1.default.create(Object.assign(Object.assign({}, response.data), { userId: _req.userId, questionId: questionId }));
+                const savedQuiz = yield quizModel_1.default.create(Object.assign(Object.assign({}, response.data), { userId: _req.userId, questionId: questionId }));
+                console.log("Saved quiz:", savedQuiz);
                 res.status(200).json(response.data);
             }
             else {
@@ -102,8 +110,20 @@ const generateQuiz = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             }
         }
         else {
+            // Let's also check what records exist for debugging
+            const allRecords = yield solvedModel_1.default.find({
+                questionId: new mongoose_1.default.Types.ObjectId(questionId),
+                userId: new mongoose_1.default.Types.ObjectId(_req.userId),
+            });
+            console.log("All solved records for this question and user:", allRecords);
             res.status(200).json({
                 message: "Please solve the question correctly to get the quiz questions",
+                debug: {
+                    questionId,
+                    userId: _req.userId,
+                    foundRecords: allRecords.length,
+                    solvedRecords: allRecords.filter((r) => r.isSolved).length,
+                },
             });
         }
     }
@@ -116,11 +136,16 @@ exports.generateQuiz = generateQuiz;
 const fetchQuiz = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const _req = req;
-        const quiz = yield quizModel_1.default.find({ userId: _req.userId });
+        // Get questionId from query params since it's a GET request
+        const { questionId } = req.query;
+        console.log("Fetching quiz for user:", _req.userId, "question:", questionId);
+        const quiz = yield quizModel_1.default.find(Object.assign({ userId: _req.userId }, (questionId && { questionId: questionId })));
+        console.log("Found quiz:", quiz);
         res.status(200).json(quiz);
     }
     catch (error) {
-        return next((0, http_errors_1.default)(500, "Error fetching the roadmap"));
+        console.error("Error fetching quiz:", error);
+        return next((0, http_errors_1.default)(500, "Error fetching the quiz"));
     }
 });
 exports.fetchQuiz = fetchQuiz;
