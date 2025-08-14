@@ -73,6 +73,12 @@ const Navbar: React.FC = () => {
             >
               Lab
             </Link>
+            <Link
+              to="/admin"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Admin
+            </Link>
           </nav>
           <Sheet>
             <SheetTrigger asChild>
@@ -98,34 +104,16 @@ const Navbar: React.FC = () => {
                   Home
                 </Link>
                 <Link
-                  to="/ai-tutor"
+                  to="/labs"
                   className="text-muted-foreground hover:text-foreground"
                 >
-                  AI Tutor
+                  Lab
                 </Link>
                 <Link
-                  to="/chat-pdf"
+                  to="/admin"
                   className="text-muted-foreground hover:text-foreground"
                 >
-                  PDF Chatting
-                </Link>
-                <Link
-                  to="/resources"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Resources
-                </Link>
-                <Link
-                  to="/community"
-                  className=" text-muted-foreground hover:text-foreground"
-                >
-                  Community
-                </Link>
-                <Link
-                  to="/"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Get Books
+                  Admin
                 </Link>
               </nav>
             </SheetContent>
