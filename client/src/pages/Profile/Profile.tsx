@@ -5,11 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "react-toastify";
-import { authApi } from "@/http/authApi";
 import { Loader2 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { loginUser } from "@/store/userAuth";
 import { RootState } from "@/store/store";
+import axios from "axios";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -42,7 +42,11 @@ const Profile = () => {
     setLoading(true);
 
     try {
-      const response = await authApi.updateProfile(profileData);
+      const response = await axios.put(
+        "https://ai-lab-2.onrender.com/api/v1/auth/profile",
+        profileData,
+        { withCredentials: true }
+      );
 
       if (response.data.success) {
         dispatch(
@@ -76,10 +80,14 @@ const Profile = () => {
     setPasswordLoading(true);
 
     try {
-      const response = await authApi.changePassword({
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-      });
+      const response = await axios.put(
+        "https://ai-lab-2.onrender.com/api/v1/auth/change-password",
+        {
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        },
+        { withCredentials: true }
+      );
 
       if (response.data.success) {
         setPasswordData({

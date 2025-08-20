@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "react-toastify";
-import { labApi } from "@/lib/api";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { Loader2 } from "lucide-react";
+import axios from "axios";
 
 interface Lab {
   _id: string;
@@ -27,7 +27,9 @@ const LabApproval = () => {
 
   const fetchPendingLabs = async () => {
     try {
-      const response = await labApi.getPendingLabs();
+      const response = await axios.get(
+        "https://ai-lab-2.onrender.com/api/v1/lab/pending"
+      );
       setLabs(response.data.labs);
     } catch (error: any) {
       toast.error("Failed to fetch pending labs");
@@ -47,7 +49,10 @@ const LabApproval = () => {
     setActionLoading(labId);
 
     try {
-      const response = await labApi.approveLab(labId, action);
+      const response = await axios.put(
+        `https://ai-lab-2.onrender.com/api/v1/lab/approve/${labId}`,
+        { action }
+      );
 
       if (response.data.success) {
         setLabs(labs.filter((lab) => lab._id !== labId));
