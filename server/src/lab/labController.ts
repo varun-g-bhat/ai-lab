@@ -137,7 +137,11 @@ const getEnrolledLabs = async (
   const _req = req as AuthRequest;
 
   try {
-    const enrollments = await enrolledModel.find({ userId: _req.userId });
+    // Only fetch enrollments with status 'approved'
+    const enrollments = await enrolledModel.find({
+      userId: _req.userId,
+      status: "approved",
+    });
     const labIds = enrollments.map((enrollment) => enrollment.labId);
     const labs = await labModel.find({ _id: { $in: labIds } });
     res.status(200).json(labs);
