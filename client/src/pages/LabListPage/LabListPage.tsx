@@ -52,7 +52,12 @@ export function LabListPage() {
 
   // Filter out enrolled labs from all labs to show only non-enrolled labs
   const nonEnrolledLabs = allLabs.filter(
-    (lab) => !enrolledLabs.some((enrolled) => enrolled._id === lab._id)
+    (lab) =>
+      !enrolledLabs.some(
+        (enrolled) =>
+          enrolled._id === lab._id ||
+          createdLabs.some((created) => created._id === lab._id)
+      )
   );
 
   const handleRequestJoin = async (labId: string) => {
