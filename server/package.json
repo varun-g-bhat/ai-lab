@@ -5,8 +5,8 @@
   "main": "server.ts",
   "scripts": {
     "dev": "nodemon server.ts",
-    "start": "node server.js",
-    "build": "tsc",
+    "start": "node ./dist/server.js",
+    "build": "npm install && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
