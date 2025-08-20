@@ -28,7 +28,8 @@ const LabApproval = () => {
   const fetchPendingLabs = async () => {
     try {
       const response = await axios.get(
-        "https://ai-lab-2.onrender.com/api/v1/lab/pending"
+        "https://ai-lab-2.onrender.com/api/v1/lab/pending",
+        { withCredentials: true }
       );
       setLabs(response.data.labs);
     } catch (error: any) {
@@ -51,7 +52,8 @@ const LabApproval = () => {
     try {
       const response = await axios.put(
         `https://ai-lab-2.onrender.com/api/v1/lab/approve/${labId}`,
-        { action }
+        { action },
+        { withCredentials: true }
       );
 
       if (response.data.success) {
