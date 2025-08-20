@@ -9,6 +9,7 @@ interface LabDetails {
   sec: string;
   subject: string;
   labcode: string;
+  status: "pending" | "approved" | "rejected";
 }
 
 const labSchema = new mongoose.Schema<LabDetails>(
@@ -46,6 +47,11 @@ const labSchema = new mongoose.Schema<LabDetails>(
       type: String,
       unique: true,
       required: true,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
     },
   },
   { timestamps: true }

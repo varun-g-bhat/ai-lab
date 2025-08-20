@@ -16,3 +16,11 @@ export const verify = async () => {
 export const logout = async () => {
   return apiClient.post("/api/v1/auth/logout");
 };
+
+export const authApi = {
+  updateProfile: (data: { name: string; email: string }) =>
+    apiClient.put("/api/v1/auth/profile", data),
+
+  changePassword: (data: { currentPassword: string; newPassword: string }) =>
+    apiClient.put("/api/v1/auth/change-password", data),
+};

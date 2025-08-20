@@ -24,6 +24,7 @@ import { LabDetailPage } from "./pages/LabDetailsPage/LabDetailsPage";
 import { LabListPage } from "./pages/LabListPage/LabListPage";
 import TeacherDashboard from "./pages/StudentPerformance/StudentPerformance";
 import ManageUsers from "./pages/AdminPage/AdminPage";
+import Profile from "./pages/Profile/Profile";
 
 function App() {
   const dispatch = useDispatch();
@@ -56,6 +57,7 @@ function App() {
           <Route path="chat-pdf" element={<PdfChatting />} />
           <Route path="resources" element={<Resources />} />
           <Route path="quiz" element={<Quiz />} />
+          <Route path="profile" element={<Profile />} />
 
           <Route path="/ai-tutor" element={<AITutorLayout />}>
             <Route index element={<AITutor />} />

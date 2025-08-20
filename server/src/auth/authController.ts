@@ -3,6 +3,7 @@ import authModel from "./authModel";
 import { sign, verify } from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
+import { AuthRequest } from "../types/auth";
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
@@ -147,6 +148,90 @@ const changeRole = async (req: Request, res: Response, next: NextFunction) => {
     res.status(200).json({ message: "User role updated successfully" });
   } catch (error) {
     return next(createHttpError(500, "Error while updating user role"));
+  }
+};
+
+export const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const _req = req as AuthRequest;
+
+    const userId = _req.userId;
+    const { name, email } = _req.body;
+
+    // Check if email is already taken by another user
+    const existingUser = await authModel.findOne({
+      email,
+      _id: { $ne: userId },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already exists",
+      });
+    }
+
+    const updatedUser = await authModel.findByIdAndUpdate(
+      userId,
+      { name, email },
+      { new: true, select: "-password" }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+export const changePassword = async (req: Request, res: Response) => {
+  try {
+    const _req = req as AuthRequest;
+
+    const userId = _req.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await authModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
+    }
+
+    // Hash new password
+    const saltRounds = 10;
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    await authModel.findByIdAndUpdate(userId, { password: hashedNewPassword });
+
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 

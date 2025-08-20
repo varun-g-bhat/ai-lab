@@ -156,8 +156,9 @@ const Navbar: React.FC = () => {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
-                  <DropdownMenuItem>Support</DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link to="/profile">Profile</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />

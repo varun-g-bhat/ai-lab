@@ -8,6 +8,8 @@ import {
   getEnrolledLabs,
   getAllLabs,
   getLabCreatedBy,
+  getPendingLabs,
+  approveLab,
 } from "./labController";
 import authenticate from "../middleware/authUser";
 import { get } from "http";
@@ -22,5 +24,7 @@ labRouter.get("/enrollments", authenticate, getAllEnrollments);
 labRouter.get("/enrolled", authenticate, getEnrolledLabs);
 labRouter.get("/all", authenticate, getAllLabs);
 labRouter.get("/created", authenticate, getLabCreatedBy);
+labRouter.get("/pending", authenticate, getPendingLabs);
+labRouter.put("/approve/:labId", authenticate, approveLab);
 
 export default labRouter;

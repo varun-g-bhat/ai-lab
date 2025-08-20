@@ -199,6 +199,57 @@ const getLabCreator = async (
   }
 };
 
+export const getPendingLabs = async (req: Request, res: Response) => {
+  try {
+    const pendingLabs = await labModel
+      .find({
+        status: "pending",
+      })
+      .populate("createdBy", "name email");
+
+    res.status(200).json({
+      success: true,
+      labs: pendingLabs,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+export const approveLab = async (req: Request, res: Response) => {
+  try {
+    const { labId } = req.params;
+    const { action } = req.body; // 'approve' or 'reject'
+
+    const lab = await labModel.findByIdAndUpdate(
+      labId,
+      { status: action === "approve" ? "approved" : "rejected" },
+      { new: true }
+    );
+
+    if (!lab) {
+      return res.status(404).json({
+        success: false,
+        message: "Lab not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Lab ${action}d successfully`,
+      lab,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
 export {
   createLab,
   getLabById,
