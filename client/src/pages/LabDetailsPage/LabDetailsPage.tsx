@@ -52,6 +52,10 @@ export function LabDetailPage() {
     navigate(`/editor/${questionId}`);
   };
 
+  const handleJoinNavigation = () => {
+    navigate(`/lab-requests`);
+  };
+
   const fetchQuestions = async () => {
     if (!labId) return;
 
@@ -194,6 +198,14 @@ export function LabDetailPage() {
         <div className="mb-4">
           <Button variant="outline" onClick={handleNavigate}>
             View Lab Performance
+          </Button>
+        </div>
+      ) : null}
+
+      {userRole === "teacher" || userRole === "admin" ? (
+        <div className="mb-4">
+          <Button variant="outline" onClick={handleJoinNavigation}>
+            Approve join requests
           </Button>
         </div>
       ) : null}

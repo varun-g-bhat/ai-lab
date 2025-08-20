@@ -101,6 +101,7 @@ export function LabListPage() {
         `${"https://ai-lab-2.onrender.com"}/api/v1/lab/enrolled`,
         { withCredentials: true }
       );
+
       console.log(response.data);
       setEnrolledLabs(response.data);
     } catch (err) {
