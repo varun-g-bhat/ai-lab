@@ -1,7 +1,7 @@
 import { Lab, Question } from "@/types/lab";
 import apiClient from "./axios";
 
-const API_BASE_URL = `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1`;
+const API_BASE_URL = `${"https://ai-lab-2.onrender.com"}/api/v1`;
 
 export const api = {
   async getEnrolledLabs(): Promise<Lab[]> {

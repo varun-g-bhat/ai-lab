@@ -59,7 +59,7 @@ export function LabListPage() {
     try {
       setRequestingJoin(labId);
       const response = await axios.post(
-        `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/lab/enroll`,
+        `${"https://ai-lab-2.onrender.com"}/api/v1/lab/enroll`,
         { labId },
         { withCredentials: true }
       );
@@ -79,7 +79,7 @@ export function LabListPage() {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/lab/all`,
+        `${"https://ai-lab-2.onrender.com"}/api/v1/lab/all`,
         {
           withCredentials: true,
         }
@@ -98,7 +98,7 @@ export function LabListPage() {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/lab/enrolled`,
+        `${"https://ai-lab-2.onrender.com"}/api/v1/lab/enrolled`,
         { withCredentials: true }
       );
       console.log(response.data);
@@ -117,7 +117,7 @@ export function LabListPage() {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/lab/created`,
+        `${"https://ai-lab-2.onrender.com"}/api/v1/lab/created`,
         { withCredentials: true }
       );
       console.log(response.data);
@@ -141,7 +141,7 @@ export function LabListPage() {
     if (e) e.preventDefault();
     try {
       const response = await axios.post(
-        `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/lab/create`,
+        `${"https://ai-lab-2.onrender.com"}/api/v1/lab/create`,
         {
           title,
           description,

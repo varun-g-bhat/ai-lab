@@ -208,7 +208,7 @@
 //     input: "9",
 //   };
 //   const response = await axios.post(
-//     `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/compiler/compile`,
+//     `${"https://ai-lab-2.onrender.com"}/api/v1/compiler/compile`,
 //     body
 //   );
 
@@ -470,7 +470,7 @@
 
 //   try {
 //     const response = await axios.post(
-//       `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/compiler/compile`,
+//       `${"https://ai-lab-2.onrender.com"}/api/v1/compiler/compile`,
 //       payload
 //     );
 
@@ -722,7 +722,7 @@ export function CodeEditorPanel() {
       input: "9",
     };
     const response = await axios.post(
-      `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/compiler/compile`,
+      `${"https://ai-lab-2.onrender.com"}/api/v1/compiler/compile`,
       body
     );
 

@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create a global axios instance with default configurations
 const apiClient = axios.create({
-  baseURL: "https://ai-lab-1-x6f6.onrender.com",
+  baseURL: "https://ai-lab-2.onrender.com",
   withCredentials: true, // Always include cookies
   headers: {
     "Content-Type": "application/json",

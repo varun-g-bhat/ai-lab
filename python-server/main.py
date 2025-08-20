@@ -30,7 +30,7 @@ if missing_vars:
 app = FastAPI()
 
 origins = [
-    "https://ai-lab-1-x6f6.onrender.com",
+    "https://ai-lab-2.onrender.com",
     "https://ai-lab-nine.vercel.app",
     "http://localhost:3000",
     "http://localhost:5173",

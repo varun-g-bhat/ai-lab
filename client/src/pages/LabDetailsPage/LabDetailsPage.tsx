@@ -60,7 +60,7 @@ export function LabDetailPage() {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/questions/lab/${labId}`,
+        `${"https://ai-lab-2.onrender.com"}/api/v1/questions/lab/${labId}`,
         { withCredentials: true }
       );
       console.log(response.data);
@@ -81,7 +81,7 @@ export function LabDetailPage() {
   const handleCreateQuestion = async () => {
     try {
       const response = await axios.post(
-        `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/questions/create`,
+        `${"https://ai-lab-2.onrender.com"}/api/v1/questions/create`,
         { title, description, labId, exInput, exOutput },
         { withCredentials: true }
       );

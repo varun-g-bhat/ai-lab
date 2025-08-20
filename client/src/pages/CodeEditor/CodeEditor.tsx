@@ -93,7 +93,7 @@ export default function CodeEditor() {
       try {
         setLoadingProblem(true);
         const response = await axios.get(
-          `${"https://ai-lab-1-x6f6.onrender.com"}/api/v1/questions/${id}`,
+          `${"https://ai-lab-2.onrender.com"}/api/v1/questions/${id}`,
           { withCredentials: true }
         );
         setSelectedProblem(response.data);
@@ -125,7 +125,7 @@ export default function CodeEditor() {
 
     try {
       const response = await axios.post(
-        `https://ai-lab-1-x6f6.onrender.com/api/v1/compiler/compile`,
+        `https://ai-lab-2.onrender.com/api/v1/compiler/compile`,
         body,
         { withCredentials: true }
       );
@@ -152,7 +152,7 @@ export default function CodeEditor() {
       // Send submission data to backend
       try {
         await axios.post(
-          `https://ai-lab-1-x6f6.onrender.com/api/v1/questions/solve`,
+          `https://ai-lab-2.onrender.com/api/v1/questions/solve`,
           {
             questionId: id,
             code: code,
@@ -233,7 +233,7 @@ export default function CodeEditor() {
 
       // First try to fetch existing quiz
       const existingQuizResponse = await axios.get(
-        `https://ai-lab-1-x6f6.onrender.com/api/v1/compiler/quiz?questionId=${id}`,
+        `https://ai-lab-2.onrender.com/api/v1/compiler/quiz?questionId=${id}`,
         { withCredentials: true }
       );
 
@@ -243,7 +243,7 @@ export default function CodeEditor() {
       } else {
         // Generate new quiz if none exists
         const generateResponse = await axios.post(
-          `https://ai-lab-1-x6f6.onrender.com/api/v1/compiler/quiz`,
+          `https://ai-lab-2.onrender.com/api/v1/compiler/quiz`,
           {
             questionId: id, // Use the id from URL params, not selectedProblem._id
           },
@@ -268,7 +268,7 @@ export default function CodeEditor() {
     try {
       setLoadingSubmissions(true);
       const response = await axios.get(
-        `https://ai-lab-1-x6f6.onrender.com/api/v1/questions/submissions/${id}`,
+        `https://ai-lab-2.onrender.com/api/v1/questions/submissions/${id}`,
         { withCredentials: true }
       );
       console.log("Submissions response:", response.data);
