@@ -229,7 +229,7 @@ Based on the problem and the submission, provide your hints.
     return response
 
 
-async def generate_quiz(problem_description):
+async def generate_quiz(problem_description, code, language):
     model = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.4)
 
     class QuestionItem(BaseModel):
@@ -248,31 +248,57 @@ async def generate_quiz(problem_description):
     parser = JsonOutputParser(pydantic_object=Quiz)
     prompt = PromptTemplate(
         template="""
-        You are an expert in creating interview preparation quizzes. Based on the question description and the code given in the string format, 
-        generate a quiz for job role preparation. 
-        Do not make the questions language specific
-        Your output must be valid JSON that includes the following fields:
-        - testName: Name of the test tailored to the job role.
-        - testDescription: A brief description of the test purpose.
-        - totalQuestions: The total number of questions.
-        - questions: A list of 10 questions, where each question includes:
-            - questionNo: The question number.
-            - question: The text of the question.
-            - options: A list of 4 answer options.
-            - answer: The correct answer.
-        - difficulty: The difficulty level based on the content.
-        
-        Ensure that your response is valid JSON.
-        
-        Problem description:
-        {problem_description}
+        You are a senior prompt engineer and a subject matter expert in software development and technical recruiting. Your task is to generate a comprehensive, valid JSON-formatted quiz for job role preparation. The quiz will be based on a provided problem description and its corresponding code solution.
+
+        ## **Role and Context**
+
+        You are an expert quiz creator specializing in technical interview preparation. Your goal is to create a quiz that assesses a candidate's understanding of core programming concepts, problem-solving skills, and code analysis abilities, **without being tied to a specific programming language**.
+
+        ---
+
+        ## **Core Instructions**
+
+        Generate a JSON object that contains a complete quiz with exactly 10 questions. The quiz must be derived from the provided `problem_description` and `code`. Ensure the questions test a candidate's understanding of the underlying logic, data structures, algorithms, and edge cases, rather than just syntax.
+
+        ---
+
+        ## **Output Requirements (JSON Structure)**
+
+        Your output **must be a single, valid JSON object** with the following keys:
+        * `testName`: A descriptive and professional name for the test, tailored to the job role.
+        * `testDescription`: A concise explanation of the test's purpose and what it evaluates.
+        * `totalQuestions`: The integer value `10`.
+        * `questions`: A JSON array containing 10 question objects. Each object in this array must contain the following keys:
+            * `questionNo`: The question's number (1 through 10).
+            * `question`: The text of the question, clearly and concisely worded.
+            * `options`: An array of exactly four strings, representing the possible answers.
+            * `answer`: A string that matches one of the options, representing the correct answer.
+        * `difficulty`: A string indicating the quiz difficulty level (e.g., "Beginner," "Intermediate," "Advanced"), determined by the complexity of the problem and code.
+
+        ---
+
+        ## **Input Variables**
+
+        You will be provided with the following information, which you must use as the basis for your quiz:
+        * `{problem_description}`: A detailed explanation of the programming problem.
+        * `{code}`: The code solution for the problem, which may be in any programming language.
+        * `{language}`: The name of the programming language used in the `{code}`.
+
+        ---
+
+        ## **Constraints and Guarantees**
+
+        * **Language Agnostic**: **Do not create questions that require knowledge of the specific syntax** of the `{language}` provided. The questions should focus on the logic, algorithm, and data structures. For example, instead of asking "What is the syntax for a for-loop in Python?", ask "What is the time complexity of the given algorithm?" or "What data structure is most suitable for this problem?".
+        * **Validity**: The final output **must be valid JSON**. Double-check for correct syntax, commas, brackets, and quotes.
+        * **Precision**: The questions and answers must be accurate and directly related to the provided problem and code.
+        * **Brevity**: Ensure all descriptions and questions are concise but complete. Avoid conversational filler.
         """,
-        input_variables=["problem_description"],
+        input_variables=["problem_description", "code", "language"],
         partial_variables={"format_instructions": parser.get_format_instructions()},
     )
 
     chain = prompt | model | parser
-    response = chain.invoke({"problem_description": problem_description})
+    response = chain.invoke({"problem_description": problem_description, "code": code, "language": language})
     return response
 
 

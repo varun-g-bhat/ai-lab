@@ -60,13 +60,28 @@ async def generate_roadmap_quiz(request: Request,token: str = Cookie(None)):
     problem = await request.json()
     print("Received problem data:", problem)
     
-    # Extract the question from the request body
-    question = problem.get("question", "")
-    if not question:
+    # Extract the required parameters from the request body
+    problem_description = problem.get("problem_description", "")
+    code = problem.get("code", "")
+    language = problem.get("language", "")
+    
+    if not problem_description:
         return JSONResponse(
             status_code=400, 
-            content={"error": "Question is required"}
+            content={"error": "Problem description is required"}
         )
     
-    quiz = await generate_quiz(question)
+    if not code:
+        return JSONResponse(
+            status_code=400, 
+            content={"error": "Code is required"}
+        )
+    
+    if not language:
+        return JSONResponse(
+            status_code=400, 
+            content={"error": "Language is required"}
+        )
+    
+    quiz = await generate_quiz(problem_description, code, language)
     return quiz

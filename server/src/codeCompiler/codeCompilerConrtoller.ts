@@ -171,9 +171,28 @@ const generateQuiz = async (
       console.log("Found problem:", !!problem);
 
       if (problem) {
+        // Get the solved code and language from the latest correct submission
+        const latestCorrectSubmission = solvedRecord.submissions
+          .filter((sub) => sub.isCorrect)
+          .sort(
+            (a, b) =>
+              new Date(b.submittedAt).getTime() -
+              new Date(a.submittedAt).getTime()
+          )[0];
+
+        if (!latestCorrectSubmission) {
+          return res
+            .status(400)
+            .json({ message: "No correct submission found" });
+        }
+
         const response = await axios.post(
           `${process.env.PYTHON_BACKEND_URL}/api/v1/aitutor/generatequiz`,
-          { question: problem.description }
+          {
+            problem_description: problem.description,
+            code: latestCorrectSubmission.code,
+            language: latestCorrectSubmission.language,
+          }
         );
 
         console.log("Python backend response:", response.data);
