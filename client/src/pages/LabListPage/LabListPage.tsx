@@ -372,44 +372,41 @@ export function LabListPage() {
         </section>
       )}
 
-      {userRole === "teacher" ||
-        (userRole === "admin" && (
-          <section>
-            <div className="flex items-center gap-2 mb-6">
-              <GraduationCap className="h-6 w-6 text-primary" />
-              <h2 className="text-2xl font-semibold">My Created Labs</h2>
-            </div>
+      {(userRole === "teacher" || userRole === "admin") && (
+        <section>
+          <div className="flex items-center gap-2 mb-6">
+            <GraduationCap className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-semibold">My Created Labs</h2>
+          </div>
 
-            {loading && <LoadingSpinner />}
+          {loading && <LoadingSpinner />}
 
-            {error && (
-              <ErrorMessage message={error} onRetry={fetchLabCreatedByUser} />
-            )}
+          {error && (
+            <ErrorMessage message={error} onRetry={fetchLabCreatedByUser} />
+          )}
 
-            {!loading && !error && (
-              <>
-                {createdLabs.length === 0 ? (
-                  <div className="text-center py-12">
-                    <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">
-                      No Created Labs
-                    </h3>
-                    <p className="text-muted-foreground">
-                      You haven't created any labs yet. Browse the available
-                      labs above to get started.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {createdLabs.map((lab) => (
-                      <LabCard key={lab._id} lab={lab} />
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-          </section>
-        ))}
+          {!loading && !error && (
+            <>
+              {createdLabs.length === 0 ? (
+                <div className="text-center py-12">
+                  <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No Created Labs</h3>
+                  <p className="text-muted-foreground">
+                    You haven't created any labs yet. Browse the available labs
+                    above to get started.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {createdLabs.map((lab) => (
+                    <LabCard key={lab._id} lab={lab} />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </section>
+      )}
     </div>
   );
 }
