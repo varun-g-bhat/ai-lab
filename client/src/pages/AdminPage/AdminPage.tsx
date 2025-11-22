@@ -50,6 +50,12 @@ const AdminPage = () => {
   const auth = useSelector((state: RootState) => state.auth);
   const userRole = (auth.userDetails as UserDetails | undefined)?.role || "";
 
+  // Debug logging
+  useEffect(() => {
+    console.log("Auth state:", auth);
+    console.log("User role:", userRole);
+  }, [auth, userRole]);
+
   // Fetch users data once when the component mounts
   useEffect(() => {
     const fetchUsers = async () => {
@@ -126,11 +132,24 @@ const AdminPage = () => {
     return users.filter((user) => user.role === role).length;
   };
 
-  if (userRole === "student") {
+  if (userRole !== "admin" && userRole !== "teacher") {
     return (
-      <>
-        <div>You don't have access to this page</div>
-      </>
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <Card>
+          <CardContent className="p-8 text-center">
+            <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
+            <p className="text-muted-foreground">
+              You don't have the required privileges to access this page.
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Current role: {userRole || "Not authenticated"}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Required: Admin or Teacher
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -139,147 +158,164 @@ const AdminPage = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2 flex items-center gap-2">
           <Users className="h-8 w-8 text-primary" />
-          Manage User Roles
+          {userRole === "admin" ? "Admin Dashboard" : "Teacher Dashboard"}
         </h1>
         <p className="text-muted-foreground">
-          Manage user roles and permissions across the platform
+          {userRole === "admin" 
+            ? "Manage user roles and permissions across the platform" 
+            : "Manage your labs and approve student enrollments"}
         </p>
       </div>
 
-      {/* Search Bar */}
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search users by username..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* User Management - Only show for admins */}
+      {userRole === "admin" && (
+        <>
+          {/* Search Bar */}
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search users by username..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Role Tabs */}
-      <Card>
-        <CardHeader>
-          <CardTitle>User Management</CardTitle>
-          <CardDescription>
-            Filter and manage users by their roles
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs
-            value={activeTab}
-            onValueChange={(value) => setActiveTab(value as UserRole)}
-          >
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="all" className="flex items-center gap-2">
-                All ({getRoleCount("all")})
-              </TabsTrigger>
-              <TabsTrigger value="student" className="flex items-center gap-2">
-                Students ({getRoleCount("student")})
-              </TabsTrigger>
-              <TabsTrigger value="teacher" className="flex items-center gap-2">
-                Teachers ({getRoleCount("teacher")})
-              </TabsTrigger>
-              <TabsTrigger value="admin" className="flex items-center gap-2">
-                Admins ({getRoleCount("admin")})
-              </TabsTrigger>
-            </TabsList>
+          {/* Role Tabs */}
+          <Card>
+            <CardHeader>
+              <CardTitle>User Management</CardTitle>
+              <CardDescription>
+                Filter and manage users by their roles
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs
+                value={activeTab}
+                onValueChange={(value) => setActiveTab(value as UserRole)}
+              >
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="all" className="flex items-center gap-2">
+                    All ({getRoleCount("all")})
+                  </TabsTrigger>
+                  <TabsTrigger value="student" className="flex items-center gap-2">
+                    Students ({getRoleCount("student")})
+                  </TabsTrigger>
+                  <TabsTrigger value="teacher" className="flex items-center gap-2">
+                    Teachers ({getRoleCount("teacher")})
+                  </TabsTrigger>
+                  <TabsTrigger value="admin" className="flex items-center gap-2">
+                    Admins ({getRoleCount("admin")})
+                  </TabsTrigger>
+                </TabsList>
 
-            <TabsContent value={activeTab} className="mt-6">
-              {filteredUsers.length === 0 ? (
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No users found</h3>
-                  <p className="text-muted-foreground">
-                    {searchTerm
-                      ? "Try adjusting your search terms."
-                      : "No users match the selected criteria."}
-                  </p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Username</TableHead>
-                      <TableHead>User ID</TableHead>
-                      <TableHead>Current Role</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers.map((user) => (
-                      <TableRow key={user._id}>
-                        <TableCell className="font-medium">
-                          {user.name}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {filteredUsers.indexOf(user) + 1}
-                          {user._id}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={getRoleBadgeVariant(user.role)}>
-                            {user.role.charAt(0).toUpperCase() +
-                              user.role.slice(1)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Select
-                            value={user.role}
-                            onValueChange={(
-                              newRole: "student" | "teacher" | "admin"
-                            ) => handleRoleChange(user._id, newRole)}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="student">Student</SelectItem>
-                              <SelectItem value="teacher">Teacher</SelectItem>
-                              <SelectItem value="admin">Admin</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+                <TabsContent value={activeTab} className="mt-6">
+                  {filteredUsers.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No users found</h3>
+                      <p className="text-muted-foreground">
+                        {searchTerm
+                          ? "Try adjusting your search terms."
+                          : "No users match the selected criteria."}
+                      </p>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Username</TableHead>
+                          <TableHead>User ID</TableHead>
+                          <TableHead>Current Role</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredUsers.map((user) => (
+                          <TableRow key={user._id}>
+                            <TableCell className="font-medium">
+                              {user.name}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {filteredUsers.indexOf(user) + 1}
+                              {user._id}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={getRoleBadgeVariant(user.role)}>
+                                {user.role.charAt(0).toUpperCase() +
+                                  user.role.slice(1)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Select
+                                value={user.role}
+                                onValueChange={(
+                                  newRole: "student" | "teacher" | "admin"
+                                ) => handleRoleChange(user._id, newRole)}
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="student">Student</SelectItem>
+                                  <SelectItem value="teacher">Teacher</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </>
+      )}
 
-      {/* Admin Dashboard Tabs */}
+      {/* Dashboard Tabs */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Admin Dashboard</CardTitle>
+          <CardTitle>
+            {userRole === "admin" ? "Admin Dashboard" : "Teacher Dashboard"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="lab-approval" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className={`grid w-full ${userRole === "admin" ? "grid-cols-3" : "grid-cols-2"}`}>
               <TabsTrigger value="lab-approval">Lab Approval</TabsTrigger>
-              <TabsTrigger value="users">User Management</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              {userRole === "admin" && (
+                <TabsTrigger value="users">User Management</TabsTrigger>
+              )}
+              <TabsTrigger value="analytics">
+                {userRole === "admin" ? "Analytics" : "My Labs"}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="lab-approval">
               <LabApproval />
             </TabsContent>
 
-            <TabsContent value="users">
-              <div className="text-center p-8">
-                <p className="text-gray-500">User management coming soon...</p>
-              </div>
-            </TabsContent>
+            {userRole === "admin" && (
+              <TabsContent value="users">
+                <div className="text-center p-8">
+                  <p className="text-gray-500">User management coming soon...</p>
+                </div>
+              </TabsContent>
+            )}
 
             <TabsContent value="analytics">
               <div className="text-center p-8">
                 <p className="text-gray-500">
-                  Analytics dashboard coming soon...
+                  {userRole === "admin" 
+                    ? "Analytics dashboard coming soon..."
+                    : "Lab management features coming soon..."}
                 </p>
               </div>
             </TabsContent>

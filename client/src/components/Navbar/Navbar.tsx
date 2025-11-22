@@ -20,13 +20,14 @@ import { toastOptions } from "@/config/toast";
 import { logoutUser } from "@/store/userAuth";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { ErrorResponse } from "@/types/auth";
+import { ErrorResponse, UserDetails } from "@/types/auth";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const auth = useSelector((state: RootState) => state.auth);
+  const userRole = (auth.userDetails as UserDetails | undefined)?.role || "";
 
   const logoutmutation = useMutation({
     mutationFn: logout,
@@ -73,12 +74,14 @@ const Navbar: React.FC = () => {
             >
               Lab
             </Link>
-            <Link
-              to="/admin"
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Admin
-            </Link>
+            {(userRole === "admin" || userRole === "teacher") && (
+              <Link
+                to="/admin"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {userRole === "admin" ? "Admin" : "Dashboard"}
+              </Link>
+            )}
           </nav>
           <Sheet>
             <SheetTrigger asChild>
@@ -109,12 +112,14 @@ const Navbar: React.FC = () => {
                 >
                   Lab
                 </Link>
-                <Link
-                  to="/admin"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Admin
-                </Link>
+                {(userRole === "admin" || userRole === "teacher") && (
+                  <Link
+                    to="/admin"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    {userRole === "admin" ? "Admin" : "Dashboard"}
+                  </Link>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
