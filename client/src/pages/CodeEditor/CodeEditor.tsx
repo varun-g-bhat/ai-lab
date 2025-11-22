@@ -146,8 +146,18 @@ export default function CodeEditor() {
       }
 
       // Determine if the solution is correct
-      const isCorrect = !hasError && actualOutput == selectedProblem?.exOutput;
-      console.log(isCorrect);
+      const expectedOutput = selectedProblem?.exOutput || "";
+      const trimmedActualOutput = actualOutput.trim();
+      const trimmedExpectedOutput = expectedOutput.trim();
+
+      console.log("Actual output:", JSON.stringify(actualOutput));
+      console.log("Expected output:", JSON.stringify(expectedOutput));
+      console.log("Trimmed actual:", JSON.stringify(trimmedActualOutput));
+      console.log("Trimmed expected:", JSON.stringify(trimmedExpectedOutput));
+
+      const isCorrect =
+        !hasError && trimmedActualOutput === trimmedExpectedOutput;
+      console.log("Is correct:", isCorrect);
 
       // Send submission data to backend
       try {
