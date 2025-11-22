@@ -30,35 +30,45 @@ labRouter.get("/pending", adminOrTeacherAuth, getPendingLabs);
 labRouter.put("/approve/:labId", adminOrTeacherAuth, approveLab);
 
 // Debug route to create sample pending labs (remove in production)
-labRouter.post("/create-sample", authenticate, async (req: express.Request, res: express.Response) => {
-  try {
-    const _req = req as AuthRequest;
-    const sampleLabs = [
-      {
-        title: "Sample Lab 1",
-        description: "This is a sample lab for testing the approval system",
-        sec: "CS101",
-        subject: "Computer Science",
-        labcode: "SAMPLE001",
-        createdBy: _req.userId,
-        status: "pending" as const
-      },
-      {
-        title: "Sample Lab 2", 
-        description: "Another sample lab for approval testing",
-        sec: "CS102",
-        subject: "Programming",
-        labcode: "SAMPLE002",
-        createdBy: _req.userId,
-        status: "pending" as const
-      }
-    ];
+labRouter.post(
+  "/create-sample",
+  authenticate,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const _req = req as AuthRequest;
+      const sampleLabs = [
+        {
+          title: "Sample Lab 1",
+          description: "This is a sample lab for testing the approval system",
+          sec: "CS101",
+          subject: "Computer Science",
+          labcode: "SAMPLE001",
+          createdBy: _req.userId,
+          status: "pending" as const,
+        },
+        {
+          title: "Sample Lab 2",
+          description: "Another sample lab for approval testing",
+          sec: "CS102",
+          subject: "Programming",
+          labcode: "SAMPLE002",
+          createdBy: _req.userId,
+          status: "pending" as const,
+        },
+      ];
 
-    const createdLabs = await labModel.insertMany(sampleLabs);
-    res.json({ success: true, message: "Sample labs created", labs: createdLabs });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Error creating sample labs", error });
+      const createdLabs = await labModel.insertMany(sampleLabs);
+      res.json({
+        success: true,
+        message: "Sample labs created",
+        labs: createdLabs,
+      });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ success: false, message: "Error creating sample labs", error });
+    }
   }
-});
+);
 
 export default labRouter;

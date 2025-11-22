@@ -33,7 +33,11 @@ const adminAuth = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 // Middleware that allows both admins and lab creators to access lab approval endpoints
-const adminOrTeacherAuth = async (req: Request, res: Response, next: NextFunction) => {
+const adminOrTeacherAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const token = req.cookies.token;
   if (!token) {
     return next(createHttpError(401, "Authorization token is required."));

@@ -31,7 +31,7 @@ const createLab = async (req: Request, res: Response, next: NextFunction) => {
       createdBy: _req.userId,
       status: "pending", // Explicitly set status to pending
     });
-    
+
     console.log("Lab created successfully:", lab.title, "Status:", lab.status);
     res.status(201).json(lab);
   } catch (error) {
@@ -211,7 +211,7 @@ export const getPendingLabs = async (req: Request, res: Response) => {
   try {
     const _req = req as AuthRequest;
     console.log("Fetching pending labs...");
-    
+
     // Get user details to check role
     const user = await authModel.findById(_req.userId);
     if (!user) {
@@ -222,7 +222,7 @@ export const getPendingLabs = async (req: Request, res: Response) => {
     }
 
     let query: any = { status: "pending" };
-    
+
     // If user is not admin, only show labs they created
     if (user.userDetails.role !== "admin") {
       query.createdBy = _req.userId;
@@ -233,8 +233,10 @@ export const getPendingLabs = async (req: Request, res: Response) => {
       .populate("createdBy", "name email")
       .sort({ createdAt: -1 }); // Sort by newest first
 
-    console.log(`Found ${pendingLabs.length} pending labs for user role: ${user.userDetails.role}`);
-    
+    console.log(
+      `Found ${pendingLabs.length} pending labs for user role: ${user.userDetails.role}`
+    );
+
     res.status(200).json({
       success: true,
       labs: pendingLabs,
@@ -257,7 +259,9 @@ export const approveLab = async (req: Request, res: Response) => {
     const { action } = req.body; // 'approve' or 'reject'
     const _req = req as AuthRequest;
 
-    console.log(`Lab approval request: ${action} lab ${labId} by user ${_req.userId}`);
+    console.log(
+      `Lab approval request: ${action} lab ${labId} by user ${_req.userId}`
+    );
 
     if (!action || !["approve", "reject"].includes(action)) {
       return res.status(400).json({
@@ -276,7 +280,9 @@ export const approveLab = async (req: Request, res: Response) => {
     }
 
     // Find the lab first to check ownership
-    const lab = await labModel.findById(labId).populate("createdBy", "name email");
+    const lab = await labModel
+      .findById(labId)
+      .populate("createdBy", "name email");
     if (!lab) {
       return res.status(404).json({
         success: false,
@@ -285,7 +291,10 @@ export const approveLab = async (req: Request, res: Response) => {
     }
 
     // If user is not admin, check if they are the creator of the lab
-    if (user.userDetails.role !== "admin" && lab.createdBy.toString() !== _req.userId) {
+    if (
+      user.userDetails.role !== "admin" &&
+      lab.createdBy.toString() !== _req.userId
+    ) {
       return res.status(403).json({
         success: false,
         message: "You can only approve labs that you created",
@@ -293,13 +302,18 @@ export const approveLab = async (req: Request, res: Response) => {
     }
 
     // Update the lab status
-    const updatedLab = await labModel.findByIdAndUpdate(
-      labId,
-      { status: action === "approve" ? "approved" : "rejected" },
-      { new: true }
-    ).populate("createdBy", "name email");
+    const updatedLab = await labModel
+      .findByIdAndUpdate(
+        labId,
+        { status: action === "approve" ? "approved" : "rejected" },
+        { new: true }
+      )
+      .populate("createdBy", "name email");
 
-    console.log(`Lab ${action}d successfully by ${user.userDetails.role}:`, updatedLab?.title);
+    console.log(
+      `Lab ${action}d successfully by ${user.userDetails.role}:`,
+      updatedLab?.title
+    );
 
     res.status(200).json({
       success: true,

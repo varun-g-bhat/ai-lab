@@ -161,8 +161,8 @@ const AdminPage = () => {
           {userRole === "admin" ? "Admin Dashboard" : "Teacher Dashboard"}
         </h1>
         <p className="text-muted-foreground">
-          {userRole === "admin" 
-            ? "Manage user roles and permissions across the platform" 
+          {userRole === "admin"
+            ? "Manage user roles and permissions across the platform"
             : "Manage your labs and approve student enrollments"}
         </p>
       </div>
@@ -202,13 +202,22 @@ const AdminPage = () => {
                   <TabsTrigger value="all" className="flex items-center gap-2">
                     All ({getRoleCount("all")})
                   </TabsTrigger>
-                  <TabsTrigger value="student" className="flex items-center gap-2">
+                  <TabsTrigger
+                    value="student"
+                    className="flex items-center gap-2"
+                  >
                     Students ({getRoleCount("student")})
                   </TabsTrigger>
-                  <TabsTrigger value="teacher" className="flex items-center gap-2">
+                  <TabsTrigger
+                    value="teacher"
+                    className="flex items-center gap-2"
+                  >
                     Teachers ({getRoleCount("teacher")})
                   </TabsTrigger>
-                  <TabsTrigger value="admin" className="flex items-center gap-2">
+                  <TabsTrigger
+                    value="admin"
+                    className="flex items-center gap-2"
+                  >
                     Admins ({getRoleCount("admin")})
                   </TabsTrigger>
                 </TabsList>
@@ -217,7 +226,9 @@ const AdminPage = () => {
                   {filteredUsers.length === 0 ? (
                     <div className="text-center py-8">
                       <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No users found</h3>
+                      <h3 className="text-lg font-medium mb-2">
+                        No users found
+                      </h3>
                       <p className="text-muted-foreground">
                         {searchTerm
                           ? "Try adjusting your search terms."
@@ -261,8 +272,12 @@ const AdminPage = () => {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="student">Student</SelectItem>
-                                  <SelectItem value="teacher">Teacher</SelectItem>
+                                  <SelectItem value="student">
+                                    Student
+                                  </SelectItem>
+                                  <SelectItem value="teacher">
+                                    Teacher
+                                  </SelectItem>
                                   <SelectItem value="admin">Admin</SelectItem>
                                 </SelectContent>
                               </Select>
@@ -288,7 +303,11 @@ const AdminPage = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="lab-approval" className="w-full">
-            <TabsList className={`grid w-full ${userRole === "admin" ? "grid-cols-3" : "grid-cols-2"}`}>
+            <TabsList
+              className={`grid w-full ${
+                userRole === "admin" ? "grid-cols-3" : "grid-cols-2"
+              }`}
+            >
               <TabsTrigger value="lab-approval">Lab Approval</TabsTrigger>
               {userRole === "admin" && (
                 <TabsTrigger value="users">User Management</TabsTrigger>
@@ -305,7 +324,9 @@ const AdminPage = () => {
             {userRole === "admin" && (
               <TabsContent value="users">
                 <div className="text-center p-8">
-                  <p className="text-gray-500">User management coming soon...</p>
+                  <p className="text-gray-500">
+                    User management coming soon...
+                  </p>
                 </div>
               </TabsContent>
             )}
@@ -313,7 +334,7 @@ const AdminPage = () => {
             <TabsContent value="analytics">
               <div className="text-center p-8">
                 <p className="text-gray-500">
-                  {userRole === "admin" 
+                  {userRole === "admin"
                     ? "Analytics dashboard coming soon..."
                     : "Lab management features coming soon..."}
                 </p>

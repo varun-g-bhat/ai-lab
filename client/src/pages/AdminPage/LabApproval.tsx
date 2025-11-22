@@ -27,7 +27,7 @@ const LabApproval = () => {
   const [labs, setLabs] = useState<Lab[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  
+
   const auth = useSelector((state: RootState) => state.auth);
   const userRole = (auth.userDetails as UserDetails | undefined)?.role || "";
 
@@ -40,7 +40,9 @@ const LabApproval = () => {
     } catch (error: any) {
       console.error("Error fetching pending labs:", error);
       console.error("Error response:", error.response);
-      toast.error(error.response?.data?.message || "Failed to fetch pending labs");
+      toast.error(
+        error.response?.data?.message || "Failed to fetch pending labs"
+      );
     } finally {
       setLoading(false);
     }
@@ -57,10 +59,9 @@ const LabApproval = () => {
     setActionLoading(labId);
 
     try {
-      const response = await apiClient.put(
-        `/api/v1/lab/approve/${labId}`,
-        { action }
-      );
+      const response = await apiClient.put(`/api/v1/lab/approve/${labId}`, {
+        action,
+      });
 
       if (response.data.success) {
         setLabs(labs.filter((lab) => lab._id !== labId));
@@ -90,7 +91,7 @@ const LabApproval = () => {
             {userRole === "admin" ? "Lab Approval System" : "My Lab Approvals"}
           </h1>
           <p className="text-muted-foreground">
-            {userRole === "admin" 
+            {userRole === "admin"
               ? "Review and approve or reject all lab submissions"
               : "Review and approve or reject labs you have created"}
           </p>
@@ -143,7 +144,7 @@ const LabApproval = () => {
               </div>
               <h3 className="text-lg font-medium">No Pending Labs</h3>
               <p className="text-muted-foreground">
-                {userRole === "admin" 
+                {userRole === "admin"
                   ? "There are currently no labs waiting for approval"
                   : "You don't have any labs waiting for approval"}
               </p>
@@ -164,19 +165,13 @@ const LabApproval = () => {
                       </p>
                     )}
                     {userRole === "teacher" && (
-                      <p className="text-sm text-blue-600 mt-1">
-                        Your Lab
-                      </p>
+                      <p className="text-sm text-blue-600 mt-1">Your Lab</p>
                     )}
                   </div>
                   <div className="flex gap-2 ml-4">
-                    <Badge variant="outline">
-                      {lab.difficulty}
-                    </Badge>
+                    <Badge variant="outline">{lab.difficulty}</Badge>
                     {userRole === "admin" && (
-                      <Badge variant="secondary">
-                        Admin Review
-                      </Badge>
+                      <Badge variant="secondary">Admin Review</Badge>
                     )}
                   </div>
                 </div>
